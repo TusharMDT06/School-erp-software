@@ -126,7 +126,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute allowedRoles={["parent"]} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/parent/dashboard" element={<DashboardPlaceholder role="Parent" />} />
-          <Route path="/parent/children" element={<ChildAttendance />} />
+          <Route path="/parent/children" element={<Navigate to="/parent/attendance" replace />} />
           <Route path="/parent/attendance" element={<ChildAttendance />} />
           <Route path="/parent/fees" element={<PayFees />} />
           <Route path="/parent/results" element={<ChildResults />} />

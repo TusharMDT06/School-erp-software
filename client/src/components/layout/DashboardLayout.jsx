@@ -73,7 +73,6 @@ const NAV_ITEMS = {
     { icon: ClipboardList,   label: "Attendance",      path: "/parent/attendance" },
     { icon: Award,           label: "Exam Results",    path: "/parent/results" },
     { icon: DollarSign,      label: "Pay Fees",        path: "/parent/fees" },
-    { icon: Users,           label: "Children",        path: "/parent/children" },
   ],
   accountant: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/accountant/dashboard" },
