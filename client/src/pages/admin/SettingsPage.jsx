@@ -272,8 +272,19 @@ const SettingsPage = () => {
       {activeTab === "profile" && (
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm space-y-6">
           <div className="flex items-center gap-4 pb-5 border-b border-slate-100">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1F4E79] to-[#2563a8] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
-              {user?.name?.charAt(0).toUpperCase()}
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1F4E79] to-[#2563a8] text-white flex items-center justify-center font-bold text-2xl shadow-sm border border-slate-200">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              ) : (
+                user?.name?.charAt(0).toUpperCase()
+              )}
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-800">{user?.name}</h3>
@@ -313,11 +324,15 @@ const SettingsPage = () => {
               />
             </div>
             <div>
-              <label className="block text-slate-500 font-semibold mb-1">Assigned School ID</label>
+              <label className="block text-slate-500 font-semibold mb-1">Assigned School</label>
               <input
                 type="text"
                 disabled
-                value={user?.schoolId || "Default Institutional Campus"}
+                value={
+                  (typeof user?.schoolId === "object"
+                    ? user?.schoolId?.name || user?.schoolId?._id
+                    : user?.schoolId) || "Default Institutional Campus"
+                }
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-slate-700 font-medium"
               />
             </div>

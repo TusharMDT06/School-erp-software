@@ -66,6 +66,7 @@ const seedDatabase = async () => {
       role: "superadmin",
       schoolId: school._id,
       phone: "+91 98765 43210",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093339/school_erp/profiles/superadmin_rajesh.jpg",
       isActive: true,
     });
 
@@ -76,6 +77,7 @@ const seedDatabase = async () => {
       role: "admin",
       schoolId: school._id,
       phone: "+91 98765 43211",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093343/school_erp/profiles/admin_principal_rajeshwar.jpg",
       isActive: true,
     });
 
@@ -86,6 +88,7 @@ const seedDatabase = async () => {
       role: "accountant",
       schoolId: school._id,
       phone: "+91 98765 43212",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093347/school_erp/profiles/accountant_manoj.jpg",
       isActive: true,
     });
 
@@ -205,6 +208,7 @@ const seedDatabase = async () => {
       role: "parent",
       schoolId: school._id,
       phone: "+91 99887 76655",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093364/school_erp/profiles/parent_suresh.jpg",
       isActive: true,
     });
 
@@ -215,6 +219,7 @@ const seedDatabase = async () => {
       role: "parent",
       schoolId: school._id,
       phone: "+91 99887 76656",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093365/school_erp/profiles/parent_meenakshi.jpg",
       isActive: true,
     });
 

@@ -53,7 +53,9 @@ const ClassForm = ({ editData, onClose }) => {
   const onSubmit = async (values) => {
     const payload = {
       ...values,
-      schoolId: user?.schoolId || undefined,
+      schoolId:
+        (typeof user?.schoolId === "object" ? user?.schoolId?._id : user?.schoolId) ||
+        undefined,
       classTeacherId: values.classTeacherId || null,
     };
 

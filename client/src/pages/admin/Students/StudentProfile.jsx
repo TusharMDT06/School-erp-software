@@ -113,11 +113,20 @@ const StudentProfile = () => {
             {/* Gradient banner */}
             <div className="h-20 bg-gradient-to-r from-sky-500 to-[#1F4E79]" />
             <div className="px-5 pb-5">
-              <div className="-mt-10 mb-3">
-                <div className="w-20 h-20 rounded-2xl bg-white ring-4 ring-white shadow-md flex items-center justify-center bg-gradient-to-br from-sky-400 to-sky-600 text-white text-3xl font-bold">
-                  {(student.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()}
+                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white ring-4 ring-white shadow-md flex items-center justify-center bg-gradient-to-br from-sky-400 to-sky-600 text-white text-3xl font-bold">
+                  {userInfo?.profileImage ? (
+                    <img
+                      src={userInfo.profileImage}
+                      alt={student.name || userInfo?.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    (student.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()
+                  )}
                 </div>
-              </div>
               <h2 className="text-lg font-bold text-slate-800">{student.name || userInfo?.name}</h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 {userInfo?.email || (

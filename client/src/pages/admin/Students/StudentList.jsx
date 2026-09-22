@@ -217,8 +217,19 @@ const StudentList = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                            {(s.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()}
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-2xs">
+                            {userInfo?.profileImage ? (
+                              <img
+                                src={userInfo.profileImage}
+                                alt={s.name || userInfo?.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              (s.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()
+                            )}
                           </div>
                           <div>
                             <p className="font-medium text-slate-800">{s.name || userInfo?.name}</p>

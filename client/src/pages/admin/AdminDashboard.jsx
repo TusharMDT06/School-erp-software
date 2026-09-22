@@ -422,8 +422,19 @@ const AdminDashboard = () => {
                     className="py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50/70 rounded-xl px-2 -mx-2 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-blue-50 text-[#1F4E79] font-bold text-xs flex items-center justify-center">
-                        {(s.name || s.userId?.name || "S").charAt(0).toUpperCase()}
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-blue-50 text-[#1F4E79] font-bold text-xs flex items-center justify-center flex-shrink-0">
+                        {s.userId?.profileImage ? (
+                          <img
+                            src={s.userId.profileImage}
+                            alt={s.name || s.userId?.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          (s.name || s.userId?.name || "S").charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-slate-800 truncate max-w-[130px]">

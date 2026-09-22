@@ -97,22 +97,38 @@ const StudentDashboard = () => {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#1F4E79] via-[#2563a8] to-[#1a3d5c] p-6 sm:p-8 text-white shadow-lg shadow-blue-900/10">
         <div className="absolute right-0 top-0 -mt-12 -mr-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-blue-100 backdrop-blur-sm flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Student Portal
-              </span>
-              <span className="text-xs text-blue-200/90 font-mono bg-black/20 px-2.5 py-0.5 rounded-full">
-                Admission: {student.admissionNumber || "ADM-2026-001"}
-              </span>
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-white/20 border-2 border-white/30 shadow-md flex-shrink-0 flex items-center justify-center text-white text-2xl font-bold">
+              {user?.profileImage || student?.userId?.profileImage ? (
+                <img
+                  src={user?.profileImage || student?.userId?.profileImage}
+                  alt={student.name || user?.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              ) : (
+                (student.name || user?.name)?.charAt(0)?.toUpperCase()
+              )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {getGreeting()}, {student.name || user?.name}! 🎓
-            </h1>
-            <p className="text-blue-100 text-xs sm:text-sm mt-1">
-              Class <strong>{student.className}</strong> · Roll Number: <strong>{student.rollNumber || "01"}</strong> · Academic Year: <strong>{student.academicYear}</strong>
-            </p>
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-blue-100 backdrop-blur-sm flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  Student Portal
+                </span>
+                <span className="text-xs text-blue-200/90 font-mono bg-black/20 px-2.5 py-0.5 rounded-full">
+                  Admission: {student.admissionNumber || "ADM-2026-001"}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {getGreeting()}, {student.name || user?.name}! 🎓
+              </h1>
+              <p className="text-blue-100 text-xs sm:text-sm mt-1">
+                Class <strong>{student.className}</strong> · Roll Number: <strong>{student.rollNumber || "01"}</strong> · Academic Year: <strong>{student.academicYear}</strong>
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

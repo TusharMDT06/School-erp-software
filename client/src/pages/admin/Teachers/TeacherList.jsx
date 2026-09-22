@@ -159,8 +159,19 @@ const TeacherList = () => {
                     <tr key={t._id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                            {info?.name?.charAt(0)?.toUpperCase()}
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-2xs">
+                            {info?.profileImage ? (
+                              <img
+                                src={info.profileImage}
+                                alt={info.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              info?.name?.charAt(0)?.toUpperCase()
+                            )}
                           </div>
                           <div>
                             <p className="font-medium text-slate-800">{info?.name}</p>

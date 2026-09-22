@@ -32,7 +32,12 @@ const DashboardPlaceholder = ({ role }) => {
         <div className="space-y-1 text-sm text-slate-600">
           <p><span className="font-medium">Email:</span> {user?.email}</p>
           <p><span className="font-medium">Role:</span> <span className="capitalize">{user?.role}</span></p>
-          <p><span className="font-medium">School ID:</span> {user?.schoolId || "N/A"}</p>
+          <p>
+            <span className="font-medium">School:</span>{" "}
+            {typeof user?.schoolId === "object"
+              ? user?.schoolId?.name || user?.schoolId?._id || "N/A"
+              : user?.schoolId || "N/A"}
+          </p>
         </div>
       </div>
     </div>

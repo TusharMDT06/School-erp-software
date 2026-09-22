@@ -224,8 +224,19 @@ const DashboardLayout = () => {
       {/* User info */}
       <div className="p-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1F4E79] to-[#2563a8] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-            {user?.name?.charAt(0)?.toUpperCase()}
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#1F4E79] to-[#2563a8] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm border border-slate-200">
+            {user?.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : (
+              user?.name?.charAt(0)?.toUpperCase()
+            )}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
@@ -317,8 +328,19 @@ const DashboardLayout = () => {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1F4E79] to-[#2563a8] flex items-center justify-center text-white font-bold text-xs">
-              {user?.name?.charAt(0)?.toUpperCase()}
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-[#1F4E79] to-[#2563a8] flex items-center justify-center text-white font-bold text-xs shadow-sm ring-2 ring-slate-100">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              ) : (
+                user?.name?.charAt(0)?.toUpperCase()
+              )}
             </div>
           </div>
         </header>
