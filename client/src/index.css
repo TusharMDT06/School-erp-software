@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-slate-50 text-slate-800 antialiased;
+  }
+}
+
+@layer components {
+  /* Primary button style */
+  .btn-primary {
+    @apply w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl
+           font-semibold text-sm text-white
+           bg-[#1F4E79] hover:bg-[#163d60]
+           focus:outline-none focus:ring-2 focus:ring-[#1F4E79] focus:ring-offset-2
+           disabled:opacity-60 disabled:cursor-not-allowed
+           transition-all duration-200 shadow-sm;
+  }
+
+  /* Secondary/outline button */
+  .btn-secondary {
+    @apply w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl
+           font-semibold text-sm text-[#1F4E79]
+           border-2 border-[#1F4E79]
+           hover:bg-[#1F4E79] hover:text-white
+           focus:outline-none focus:ring-2 focus:ring-[#1F4E79] focus:ring-offset-2
+           disabled:opacity-60 disabled:cursor-not-allowed
+           transition-all duration-200;
+  }
+
+  /* Form input */
+  .form-input {
+    @apply w-full px-4 py-3 rounded-xl border border-slate-200
+           bg-white text-slate-800 placeholder-slate-400 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#1F4E79] focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .form-input-error {
+    @apply border-red-400 focus:ring-red-400;
+  }
+
+  /* Auth card */
+  .auth-card {
+    @apply bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 p-8;
+  }
+}
