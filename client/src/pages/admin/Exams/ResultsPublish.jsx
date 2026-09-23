@@ -233,7 +233,7 @@ const ResultsPublish = () => {
             <div>
               <h3 className="text-sm font-bold text-slate-800">Publishing Actions</h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Generate personalized remarks via Claude AI and generate sealed PDF report cards for all students.
+                Generate personalized remarks via Gemini AI and generate sealed PDF report cards for all students.
               </p>
             </div>
 

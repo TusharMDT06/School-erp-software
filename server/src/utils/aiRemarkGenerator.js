@@ -1,8 +1,8 @@
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 /**
  * Generates an encouraging, personalized 1-2 sentence report card remark for a student.
- * Uses Anthropic API with graceful fallback to template-based remark if API key is not configured or network fails.
+ * Uses Google Gemini API with graceful fallback to template-based remark if API key is not configured or network fails.
  *
  * @param {string} studentName - Student's name
  * @param {number} percentage - Overall percentage
@@ -11,7 +11,7 @@ const Anthropic = require("@anthropic-ai/sdk");
  * @returns {Promise<string>} - 1-2 sentence remark
  */
 const generateRemark = async (studentName, percentage, grade, weakSubjects = []) => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   // Fallback generator helper
   const getFallbackRemark = () => {
@@ -39,7 +39,9 @@ const generateRemark = async (studentName, percentage, grade, weakSubjects = [])
   }
 
   try {
-    const anthropic = new Anthropic({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     const weakText =
       weakSubjects.length > 0
         ? `Subjects needing improvement: ${weakSubjects.join(", ")}.`
@@ -53,19 +55,15 @@ ${weakText}
 
 Write a professional, encouraging, personalized 1-2 sentence teacher remark for this student's official report card. Do not include quotes or prefixes like "Remark:". Just the remark.`;
 
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 150,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const remarkText = message.content?.[0]?.text?.trim();
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const remarkText = response.text()?.trim();
     if (remarkText) {
       return remarkText;
     }
     return getFallbackRemark();
   } catch (error) {
-    console.warn("⚠️ Anthropic AI remark generation failed, using template fallback:", error.message);
+    console.warn("⚠️ Gemini AI remark generation failed, using template fallback:", error.message);
     return getFallbackRemark();
   }
 };
