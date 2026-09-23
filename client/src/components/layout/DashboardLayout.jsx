@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../features/auth/authSlice";
 import { joinUserRoom, getSocket } from "../../utils/socket";
 import toast from "react-hot-toast";
+import AIChatWidget from "../ai/AIChatWidget";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -350,6 +351,9 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* AI Chat Widget — available to all roles */}
+      <AIChatWidget />
     </div>
   );
 };

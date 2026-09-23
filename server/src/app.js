@@ -14,9 +14,14 @@ const examRoutes = require("./routes/exam.routes");
 const resultRoutes = require("./routes/result.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const schoolRoutes = require("./routes/school.routes");
+const aiAssistantRoutes = require("./routes/aiAssistant.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
+const morganMiddleware = require("./middlewares/morgan.middleware");
 
 const app = express();
+
+// ─── HTTP Request Logging (Morgan) ─────────────────────────────────────────
+app.use(morganMiddleware);
 
 // ─── Security Headers ──────────────────────────────────────────────────────
 app.use(helmet());
@@ -55,6 +60,7 @@ app.use("/api/exams", examRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/schools", schoolRoutes);
+app.use("/api/ai", aiAssistantRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

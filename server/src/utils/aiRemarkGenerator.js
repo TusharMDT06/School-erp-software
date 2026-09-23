@@ -1,19 +1,16 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { generateText } = require("../config/geminiClient");
 
 /**
  * Generates an encouraging, personalized 1-2 sentence report card remark for a student.
- * Uses Google Gemini API with graceful fallback to template-based remark if API key is not configured or network fails.
+ * Uses Google Gemini API with graceful fallback if API unavailable.
  *
- * @param {string} studentName - Student's name
- * @param {number} percentage - Overall percentage
- * @param {string} grade - Letter grade (e.g. 'A+', 'B', 'F')
- * @param {Array<string>} weakSubjects - List of subjects where student scored low or failed
- * @returns {Promise<string>} - 1-2 sentence remark
+ * @param {string} studentName
+ * @param {number} percentage
+ * @param {string} grade
+ * @param {Array<string>} weakSubjects
+ * @returns {Promise<string>}
  */
 const generateRemark = async (studentName, percentage, grade, weakSubjects = []) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  // Fallback generator helper
   const getFallbackRemark = () => {
     const weakList = weakSubjects.length > 0 ? weakSubjects.join(", ") : null;
 
@@ -34,14 +31,11 @@ const generateRemark = async (studentName, percentage, grade, weakSubjects = [])
     }
   };
 
-  if (!apiKey) {
+  if (!process.env.GEMINI_API_KEY) {
     return getFallbackRemark();
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const weakText =
       weakSubjects.length > 0
         ? `Subjects needing improvement: ${weakSubjects.join(", ")}.`
@@ -55,19 +49,12 @@ ${weakText}
 
 Write a professional, encouraging, personalized 1-2 sentence teacher remark for this student's official report card. Do not include quotes or prefixes like "Remark:". Just the remark.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const remarkText = response.text()?.trim();
-    if (remarkText) {
-      return remarkText;
-    }
-    return getFallbackRemark();
+    const remarkText = await generateText(prompt);
+    return remarkText || getFallbackRemark();
   } catch (error) {
-    console.warn("⚠️ Gemini AI remark generation failed, using template fallback:", error.message);
+    console.warn("⚠️ Gemini remark generation failed, using fallback:", error.message);
     return getFallbackRemark();
   }
 };
 
-module.exports = {
-  generateRemark,
-};
+module.exports = { generateRemark };
