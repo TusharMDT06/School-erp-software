@@ -47,4 +47,5 @@ const startServer = async () => {
   });
 };
 
+// Bootstrap application
 startServer();
