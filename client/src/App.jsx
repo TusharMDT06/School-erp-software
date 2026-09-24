@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { refreshAccessToken, fetchCurrentUser } from "./features/auth/authSlice";
+import { refreshAccessToken, fetchCurrentUser, setInitialized } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
 
 /**
@@ -18,14 +18,18 @@ const App = () => {
 
   useEffect(() => {
     const silentRefresh = async () => {
-      const result = await dispatch(refreshAccessToken());
-      if (refreshAccessToken.fulfilled.match(result)) {
-        // Token refreshed — now get the full user profile
-        await dispatch(fetchCurrentUser());
+      try {
+        const result = await dispatch(refreshAccessToken());
+        if (refreshAccessToken.fulfilled.match(result)) {
+          // Token refreshed — now get the full user profile
+          await dispatch(fetchCurrentUser());
+        }
+      } finally {
+        dispatch(setInitialized());
       }
     };
     silentRefresh();
-  }, []); // Run only on mount
+  }, [dispatch]); // Run only on mount
 
   return (
     <BrowserRouter>

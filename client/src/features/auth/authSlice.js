@@ -6,6 +6,7 @@ const initialState = {
   user: null,           // { id, name, email, role, schoolId, profileImage }
   accessToken: null,    // JWT access token (in memory only — NOT localStorage)
   isAuthenticated: false,
+  isInitialized: false, // Tracks whether initial auth check has completed
   loading: false,
   error: null,
 };
@@ -106,8 +107,13 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
+      state.isInitialized = true;
       state.error = null;
       state.loading = false;
+    },
+    /** Mark initial authentication check as done */
+    setInitialized: (state) => {
+      state.isInitialized = true;
     },
   },
   extraReducers: (builder) => {
@@ -122,12 +128,14 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
+        state.isInitialized = true;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.isAuthenticated = false;
+        state.isInitialized = true;
       });
 
     // ── logoutUser ─────────────────────────────────────────────────────
@@ -136,6 +144,7 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
+        state.isInitialized = true;
         state.error = null;
         state.loading = false;
       });
@@ -149,9 +158,11 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
+        state.isInitialized = true;
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.loading = false;
+        state.isInitialized = true;
         // Don't set error here — this is a background check
       });
 
@@ -166,9 +177,10 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
+        state.isInitialized = true;
       });
   },
 });
 
-export const { clearAuth, clearError, setCredentials } = authSlice.actions;
+export const { clearAuth, clearError, setCredentials, setInitialized } = authSlice.actions;
 export default authSlice.reducer;
