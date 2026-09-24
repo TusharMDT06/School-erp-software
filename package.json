@@ -1,0 +1,21 @@
+{
+  "name": "school-erp-system",
+  "version": "1.0.0",
+  "description": "School ERP SaaS Platform - Full Stack MERN",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "build:client": "npm run build --prefix client",
+    "start:server": "npm start --prefix server",
+    "seed:server": "npm run seed --prefix server"
+  },
+  "keywords": [
+    "school-erp",
+    "mern",
+    "react",
+    "express",
+    "mongodb"
+  ],
+  "author": "Tushar Rajput",
+  "license": "ISC"
+}

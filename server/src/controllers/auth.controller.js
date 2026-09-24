@@ -32,10 +32,12 @@ const resetPasswordSchema = z.object({
 
 // ─── Helper: Cookie Options ────────────────────────────────────────────────
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const refreshCookieOptions = {
   httpOnly: true,         // Not accessible via JavaScript
-  secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-  sameSite: "strict",
+  secure: isProduction,   // HTTPS only in prod (required for sameSite: "none")
+  sameSite: isProduction ? "none" : "lax", // "none" allows cross-domain cookies between Render frontend & backend
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 
@@ -187,7 +189,11 @@ const refreshToken = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("+refreshToken");
     if (!user || user.refreshToken !== token) {
       // Token reuse detected or user not found — clear cookie
-      res.clearCookie("refreshToken");
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+      });
       throw new ApiError(401, "Session invalid. Please log in again.");
     }
 
@@ -225,8 +231,8 @@ const logout = async (req, res, next) => {
     // Clear cookie regardless
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     });
 
     return res

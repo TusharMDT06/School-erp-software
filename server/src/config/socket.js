@@ -7,9 +7,25 @@ let io = null;
  * Supports CORS configuration matching Express app.
  */
 const initSocket = (httpServer) => {
+  const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173,http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""));
+
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/$/, "");
+        if (
+          allowedOrigins.includes(cleanOrigin) ||
+          allowedOrigins.includes("*") ||
+          cleanOrigin.endsWith(".onrender.com") ||
+          process.env.NODE_ENV !== "production"
+        ) {
+          return callback(null, true);
+        }
+        return callback(new Error(`Socket CORS blocked for origin: ${origin}`));
+      },
       credentials: true,
       methods: ["GET", "POST"],
     },
