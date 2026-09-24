@@ -1,4 +1,6 @@
 const Student = require("../models/Student.model");
+const User = require("../models/User.model");
+const ClassSection = require("../models/ClassSection.model");
 const sendEmail = require("./sendEmail");
 const { getIO } = require("../config/socket");
 

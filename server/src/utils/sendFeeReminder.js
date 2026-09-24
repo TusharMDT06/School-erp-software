@@ -1,4 +1,8 @@
 const FeeTransaction = require("../models/FeeTransaction.model");
+const Student = require("../models/Student.model");
+const User = require("../models/User.model");
+const ClassSection = require("../models/ClassSection.model");
+const FeeStructure = require("../models/FeeStructure.model");
 const sendEmail = require("./sendEmail");
 
 /**
