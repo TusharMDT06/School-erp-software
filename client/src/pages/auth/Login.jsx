@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { loginUser, clearError } from "../../features/auth/authSlice";
 
@@ -24,6 +24,16 @@ const ROLE_REDIRECT = {
   parent: "/parent/dashboard",
   accountant: "/accountant/dashboard",
 };
+
+// ── Demo Accounts for Recruiter ────────────────────────────────────────────
+const DEMO_ACCOUNTS = [
+  { label: "Admin", role: "superadmin", email: "demo@school.edu", password: "Password@123", icon: "👑" },
+  { label: "Principal", role: "admin", email: "principal@school.edu", password: "Admin@123", icon: "🏫" },
+  { label: "Teacher", role: "teacher", email: "vikram.maths@school.edu", password: "Password@123", icon: "👩‍🏫" },
+  { label: "Student", role: "student", email: "aarav.student@school.edu", password: "Password@123", icon: "🎓" },
+  { label: "Parent", role: "parent", email: "parent@school.edu", password: "Password@123", icon: "👨‍👩‍👦" },
+  { label: "Accountant", role: "accountant", email: "accountant@school.edu", password: "Password@123", icon: "💰" },
+];
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -49,6 +59,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
@@ -59,6 +70,13 @@ const Login = () => {
       toast.success("Welcome back!");
       navigate(ROLE_REDIRECT[role] || "/admin/dashboard", { replace: true });
     }
+  };
+
+  const handleQuickLogin = (acc) => {
+    setValue("email", acc.email, { shouldValidate: true });
+    setValue("password", acc.password, { shouldValidate: true });
+    toast.success(`Signing in as ${acc.label}...`);
+    onSubmit({ email: acc.email, password: acc.password });
   };
 
   return (
@@ -81,12 +99,49 @@ const Login = () => {
 
         {/* Auth Card */}
         <div className="auth-card">
-          <div className="mb-6">
+          <div className="mb-4">
             <h2 className="text-xl font-bold text-slate-800">Sign in to your account</h2>
             <p className="text-slate-500 text-sm mt-1">Enter your credentials to access the dashboard</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+          {/* Quick Demo Access for Recruiters & Reviewers */}
+          <div className="mb-5 p-3 bg-gradient-to-br from-slate-50 to-blue-50/60 border border-blue-100 rounded-xl">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-[#1F4E79] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                Recruiter Quick Demo Access
+              </span>
+              <span className="text-[10px] text-blue-700 bg-blue-100/80 font-semibold px-2 py-0.5 rounded-full">
+                1-Click Login
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-2">
+              Reviewing this project? Click any role to log in instantly:
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {DEMO_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.role}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleQuickLogin(acc)}
+                  className="px-2 py-1.5 text-xs font-medium bg-white hover:bg-blue-50/80 text-slate-700 hover:text-[#1F4E79] border border-slate-200 hover:border-blue-300 rounded-lg shadow-xs transition-all flex items-center justify-center gap-1 group active:scale-95 disabled:opacity-50"
+                  title={`Login as ${acc.label} (${acc.email})`}
+                >
+                  <span className="text-xs group-hover:scale-110 transition-transform">{acc.icon}</span>
+                  <span className="font-medium text-[11px] truncate">{acc.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative flex py-1 items-center mb-4">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-2 text-[11px] font-medium text-slate-400 uppercase tracking-wider">or sign in with email</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">

@@ -81,6 +81,17 @@ const seedDatabase = async () => {
       isActive: true,
     });
 
+    const demoRecruiter = await User.create({
+      name: "Demo Recruiter",
+      email: "demo@school.edu",
+      password: "Password@123",
+      role: "superadmin",
+      schoolId: school._id,
+      phone: "+91 99999 88888",
+      profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093339/school_erp/profiles/superadmin_rajesh.jpg",
+      isActive: true,
+    });
+
     const principal = await User.create({
       name: "Dr. Rajeshwar Sharma",
       email: "principal@school.edu",
