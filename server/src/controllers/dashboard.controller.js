@@ -16,7 +16,29 @@ const { ApiResponse } = require("../utils/apiResponse");
  */
 const getAdminDashboardStats = async (req, res, next) => {
   try {
-    const schoolFilter = req.user?.schoolId ? { schoolId: req.user.schoolId } : {};
+    const schoolId = req.user?.schoolId;
+
+    let schoolClassIds = [];
+    let schoolUserIds = [];
+    let feeStructureIds = [];
+
+    if (schoolId) {
+      const [classes, users, feeStructures] = await Promise.all([
+        ClassSection.find({ schoolId }).select("_id"),
+        User.find({ schoolId }).select("_id"),
+        FeeStructure.find({ schoolId }).select("_id"),
+      ]);
+      schoolClassIds = classes.map((c) => c._id);
+      schoolUserIds = users.map((u) => u._id);
+      feeStructureIds = feeStructures.map((f) => f._id);
+    }
+
+    const studentFilter = schoolId ? { classId: { $in: schoolClassIds } } : {};
+    const teacherFilter = schoolId ? { userId: { $in: schoolUserIds } } : {};
+    const classFilter = schoolId ? { schoolId } : {};
+    const examFilter = schoolId ? { schoolId } : {};
+    const feeTxFilter = schoolId ? { feeStructureId: { $in: feeStructureIds } } : {};
+    const attendanceFilter = schoolId ? { classId: { $in: schoolClassIds } } : {};
 
     // 1. Basic Counts in parallel
     const [
@@ -27,12 +49,12 @@ const getAdminDashboardStats = async (req, res, next) => {
       totalClasses,
       totalExams,
     ] = await Promise.all([
-      Student.countDocuments(),
-      Student.countDocuments({ status: "active" }),
-      Student.countDocuments({ isAccountActivated: false }),
-      Teacher.countDocuments(),
-      ClassSection.countDocuments(),
-      Exam.countDocuments(),
+      Student.countDocuments(studentFilter),
+      Student.countDocuments({ ...studentFilter, status: "active" }),
+      Student.countDocuments({ ...studentFilter, isAccountActivated: false }),
+      Teacher.countDocuments(teacherFilter),
+      ClassSection.countDocuments(classFilter),
+      Exam.countDocuments(examFilter),
     ]);
 
     // 2. Today's Attendance Overview
@@ -42,6 +64,7 @@ const getAdminDashboardStats = async (req, res, next) => {
     endOfToday.setHours(23, 59, 59, 999);
 
     const todayAttendance = await Attendance.find({
+      ...attendanceFilter,
       date: { $gte: startOfToday, $lte: endOfToday },
     });
 
@@ -58,19 +81,19 @@ const getAdminDashboardStats = async (req, res, next) => {
 
     // 3. Fee Collections & Revenue
     const revenueAgg = await FeeTransaction.aggregate([
-      { $match: { status: "paid" } },
+      { $match: { ...feeTxFilter, status: "paid" } },
       { $group: { _id: null, total: { $sum: "$amountPaid" } } },
     ]);
     const totalRevenue = revenueAgg[0]?.total || 0;
 
     const pendingRevenueAgg = await FeeTransaction.aggregate([
-      { $match: { status: { $in: ["pending", "overdue"] } } },
+      { $match: { ...feeTxFilter, status: { $in: ["pending", "overdue"] } } },
       { $group: { _id: null, total: { $sum: "$amountDue" } } },
     ]);
     const pendingRevenue = pendingRevenueAgg[0]?.total || 0;
 
     // Recent Fee Transactions
-    const recentTransactions = await FeeTransaction.find()
+    const recentTransactions = await FeeTransaction.find(feeTxFilter)
       .populate({
         path: "studentId",
         select: "name admissionNumber",
@@ -80,7 +103,8 @@ const getAdminDashboardStats = async (req, res, next) => {
       .limit(5);
 
     // 4. Class Distribution (Students per class)
-    const classDistributionRaw = await Student.aggregate([
+    const classDistributionPipeline = [
+      ...(schoolId ? [{ $match: { classId: { $in: schoolClassIds } } }] : []),
       { $group: { _id: "$classId", count: { $sum: 1 } } },
       {
         $lookup: {
@@ -105,17 +129,18 @@ const getAdminDashboardStats = async (req, res, next) => {
       },
       { $sort: { className: 1 } },
       { $limit: 8 },
-    ]);
+    ];
+    const classDistributionRaw = await Student.aggregate(classDistributionPipeline);
 
     // 5. Recent Admissions
-    const recentStudents = await Student.find()
+    const recentStudents = await Student.find(studentFilter)
       .populate("classId", "className section academicYear")
       .populate("userId", "name email")
       .sort({ createdAt: -1 })
       .limit(5);
 
     // 6. Upcoming / Recent Exams
-    const recentExams = await Exam.find()
+    const recentExams = await Exam.find(examFilter)
       .populate("classId", "className section")
       .sort({ createdAt: -1 })
       .limit(4);
@@ -140,6 +165,7 @@ const getAdminDashboardStats = async (req, res, next) => {
     const attendanceTrend = await Promise.all(
       last7Days.map(async ({ dayName, start, end }) => {
         const records = await Attendance.find({
+          ...attendanceFilter,
           date: { $gte: start, $lt: end },
         });
         const present = records.filter((r) => r.status === "present" || r.status === "late").length;
