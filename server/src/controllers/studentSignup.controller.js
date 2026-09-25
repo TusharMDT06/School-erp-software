@@ -10,12 +10,14 @@ const { ApiResponse, ApiError } = require("../utils/apiResponse");
 const SIGNUP_TOKEN_SECRET =
   process.env.SIGNUP_TOKEN_SECRET || "fallback_student_signup_token_secret_2026_xyz";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isHttpsOrProd =
+  process.env.NODE_ENV === "production" ||
+  Boolean(process.env.CLIENT_URL && process.env.CLIENT_URL.startsWith("https"));
 
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
+  secure: isHttpsOrProd,
+  sameSite: isHttpsOrProd ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 
