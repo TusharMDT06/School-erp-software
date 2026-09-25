@@ -62,6 +62,13 @@ const createSchool = async (req, res, next) => {
  */
 const updateSchool = async (req, res, next) => {
   try {
+    const school = await School.findById(req.params.id);
+    if (!school) throw new ApiError(404, "School not found.");
+
+    if (req.user?.email !== "tusharrajput857@gmail.com" && school.contactEmail === "tusharrajput857@gmail.com") {
+      throw new ApiError(403, "Action forbidden: Official school settings are protected.");
+    }
+
     const parsed = schoolSchema.partial().safeParse(req.body);
     if (!parsed.success) {
       const errors = parsed.error.errors.map((e) => ({
@@ -75,7 +82,6 @@ const updateSchool = async (req, res, next) => {
       new: true,
       runValidators: true,
     });
-    if (!updated) throw new ApiError(404, "School not found.");
 
     return res.status(200).json(new ApiResponse(200, updated, "School updated successfully."));
   } catch (err) {
@@ -88,8 +94,14 @@ const updateSchool = async (req, res, next) => {
  */
 const deleteSchool = async (req, res, next) => {
   try {
-    const school = await School.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    const school = await School.findById(req.params.id);
     if (!school) throw new ApiError(404, "School not found.");
+
+    if (req.user?.email !== "tusharrajput857@gmail.com") {
+      throw new ApiError(403, "Action forbidden: Only the primary superadmin can delete or deactivate schools.");
+    }
+
+    const updated = await School.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
     return res.status(200).json(new ApiResponse(200, null, "School deactivated successfully."));
   } catch (err) {
     next(err);

@@ -4,6 +4,7 @@ const path = require("path");
 const User = require("../models/User.model");
 const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
+const ClassSection = require("../models/ClassSection.model");
 const sendEmail = require("../utils/sendEmail");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
 
@@ -106,6 +107,15 @@ const createStudent = async (req, res, next) => {
       guardianIds,
     } = parsed.data;
 
+    // Verify class exists and belongs to user's school if schoolId is present
+    const targetClass = await ClassSection.findById(classId);
+    if (!targetClass) {
+      throw new ApiError(404, "Selected class not found.");
+    }
+    if (req.user?.schoolId && targetClass.schoolId && targetClass.schoolId.toString() !== req.user.schoolId.toString()) {
+      throw new ApiError(403, "You do not have permission to admit students into another school's class.");
+    }
+
     // Pre-flight check for duplicate admission number
     const existingStudent = await Student.findOne({
       admissionNumber: admissionNumber.toUpperCase(),
@@ -178,6 +188,19 @@ const listStudents = async (req, res, next) => {
     const filter = {};
     if (classId) filter.classId = classId;
     if (status) filter.status = status;
+
+    // School scoping: only show students in classes belonging to user's school
+    if (req.user?.schoolId) {
+      const schoolClasses = await ClassSection.find({ schoolId: req.user.schoolId }).select("_id");
+      const schoolClassIds = schoolClasses.map((c) => c._id.toString());
+      if (filter.classId) {
+        if (!schoolClassIds.includes(filter.classId.toString())) {
+          return res.status(200).json(new ApiResponse(200, { data: [], page: 1, totalPages: 0, totalCount: 0 }));
+        }
+      } else {
+        filter.classId = { $in: schoolClasses.map((c) => c._id) };
+      }
+    }
 
     // Teachers can only see students in their assigned classes
     if (req.user.role === "teacher") {
@@ -387,8 +410,12 @@ const updateStudent = async (req, res, next) => {
 // ══════════════════════════════════════════════════════════════════════════
 const deleteStudent = async (req, res, next) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findById(req.params.id).populate("classId");
     if (!student) throw new ApiError(404, "Student not found.");
+
+    if (req.user?.schoolId && student.classId?.schoolId && student.classId.schoolId.toString() !== req.user.schoolId.toString()) {
+      throw new ApiError(403, "You do not have permission to delete students from another school.");
+    }
 
     // 1. Delete linked user account so their login is removed
     if (student.userId) {

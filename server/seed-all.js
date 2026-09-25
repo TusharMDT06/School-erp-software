@@ -46,13 +46,22 @@ const seedDatabase = async () => {
     ]);
     console.log("✨ Collections cleared.");
 
-    // ── 1. Create School ─────────────────────────────────────────────────────
-    console.log("🏫 Creating School...");
+    // ── 1. Create Schools (Demo Sandbox & Official) ───────────────────────────
+    console.log("🏫 Creating Schools...");
     const school = await School.create({
-      name: "St. Xavier's International Academy",
+      name: "St. Xavier's International Academy (Demo Sandbox)",
       address: "Sector 42, Institutional Area, New Delhi - 110001",
       contactEmail: "contact@stxaviers.edu",
       contactPhone: "+91 11 2345 6789",
+      logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
+      isActive: true,
+    });
+
+    const officialSchool = await School.create({
+      name: "St. Xavier's Public School (Official)",
+      address: "Main Institutional Campus, New Delhi - 110001",
+      contactEmail: "tusharrajput857@gmail.com",
+      contactPhone: "+91 98765 43210",
       logoUrl: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=150&auto=format&fit=crop&q=80",
       isActive: true,
     });
@@ -75,7 +84,7 @@ const seedDatabase = async () => {
       email: "tusharrajput857@gmail.com",
       password: "Admin@123",
       role: "superadmin",
-      schoolId: school._id,
+      schoolId: officialSchool._id,
       phone: "+91 98765 43210",
       profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093339/school_erp/profiles/superadmin_rajesh.jpg",
       isActive: true,

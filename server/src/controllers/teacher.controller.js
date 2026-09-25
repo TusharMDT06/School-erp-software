@@ -151,6 +151,15 @@ const listTeachers = async (req, res, next) => {
       filter._id = self._id;
     }
 
+    // School scoping: only show teachers belonging to user's school
+    if (req.user?.schoolId) {
+      const schoolUsers = await User.find({ schoolId: req.user.schoolId }).select("_id");
+      const userIds = schoolUsers.map((u) => u._id);
+      if (!filter.userId) {
+        filter.userId = { $in: userIds };
+      }
+    }
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build aggregation to filter by user name/email (search)
@@ -272,6 +281,16 @@ const updateTeacher = async (req, res, next) => {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new ApiError(404, "Teacher not found.");
 
+    if (teacher.userId) {
+      const teacherUser = await User.findById(teacher.userId);
+      if (teacherUser?.email === "tusharrajput857@gmail.com") {
+        throw new ApiError(403, "Official administrator account is protected and cannot be modified.");
+      }
+      if (req.user?.schoolId && teacherUser?.schoolId && teacherUser.schoolId.toString() !== req.user.schoolId.toString()) {
+        throw new ApiError(403, "You do not have permission to edit teachers from another school.");
+      }
+    }
+
     const { name, phone, employeeId, subjects, qualifications, joiningDate, salary, assignedClasses } =
       parsed.data;
 
@@ -313,18 +332,24 @@ const deleteTeacher = async (req, res, next) => {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new ApiError(404, "Teacher not found.");
 
+    if (teacher.userId) {
+      const teacherUser = await User.findById(teacher.userId);
+      if (teacherUser?.email === "tusharrajput857@gmail.com") {
+        throw new ApiError(403, "Official administrator account is protected and cannot be deleted.");
+      }
+      if (req.user?.schoolId && teacherUser?.schoolId && teacherUser.schoolId.toString() !== req.user.schoolId.toString()) {
+        throw new ApiError(403, "You do not have permission to delete teachers from another school.");
+      }
+      await User.findByIdAndDelete(teacher.userId);
+    }
+
     // 1. Remove this teacher as classTeacher from any assigned classes
     await ClassSection.updateMany(
       { classTeacherId: teacher._id },
       { $set: { classTeacherId: null } }
     );
 
-    // 2. Delete linked user account so their login is removed
-    if (teacher.userId) {
-      await User.findByIdAndDelete(teacher.userId);
-    }
-
-    // 3. Delete the teacher document
+    // 2. Delete the teacher document
     await Teacher.findByIdAndDelete(req.params.id);
 
     return res
