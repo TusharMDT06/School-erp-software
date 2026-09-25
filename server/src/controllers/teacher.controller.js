@@ -2,6 +2,7 @@ const { z } = require("zod");
 const mongoose = require("mongoose");
 const User = require("../models/User.model");
 const Teacher = require("../models/Teacher.model");
+const ClassSection = require("../models/ClassSection.model");
 const sendEmail = require("../utils/sendEmail");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
 
@@ -305,19 +306,30 @@ const updateTeacher = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════════════════
-//  DELETE /api/teachers/:id  (soft delete — deactivates linked User)
+//  DELETE /api/teachers/:id  (permanently delete teacher & linked user)
 // ══════════════════════════════════════════════════════════════════════════
 const deleteTeacher = async (req, res, next) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new ApiError(404, "Teacher not found.");
 
-    // Soft delete: deactivate the user account
-    await User.findByIdAndUpdate(teacher.userId, { isActive: false });
+    // 1. Remove this teacher as classTeacher from any assigned classes
+    await ClassSection.updateMany(
+      { classTeacherId: teacher._id },
+      { $set: { classTeacherId: null } }
+    );
+
+    // 2. Delete linked user account so their login is removed
+    if (teacher.userId) {
+      await User.findByIdAndDelete(teacher.userId);
+    }
+
+    // 3. Delete the teacher document
+    await Teacher.findByIdAndDelete(req.params.id);
 
     return res
       .status(200)
-      .json(new ApiResponse(200, null, "Teacher deactivated successfully."));
+      .json(new ApiResponse(200, null, "Teacher deleted successfully."));
   } catch (err) {
     next(err);
   }

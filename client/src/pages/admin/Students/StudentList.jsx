@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Plus, Search, Filter, ChevronLeft, ChevronRight,
-  Eye, Pencil, UserX, GraduationCap,
+  Eye, Pencil, UserX, GraduationCap, Trash2,
 } from "lucide-react";
-import { fetchStudents, deleteStudent } from "../../../features/student/studentSlice";
+import { fetchStudents, deleteStudent, updateStudent } from "../../../features/student/studentSlice";
 import { fetchClasses } from "../../../features/class/classSlice";
 import StudentForm from "./StudentForm";
 
@@ -52,6 +52,7 @@ const StudentList = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Load classes for filter dropdown
   useEffect(() => {
@@ -89,14 +90,29 @@ const StudentList = () => {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const handleDeactivate = async (id) => {
-    const res = await dispatch(deleteStudent(id));
-    if (deleteStudent.fulfilled.match(res)) {
-      toast.success("Student deactivated.");
+  const handleDeactivate = async (target) => {
+    const targetId = target?._id || target;
+    const res = await dispatch(updateStudent({ id: targetId, data: { status: "transferred" } }));
+    if (updateStudent.fulfilled.match(res)) {
+      toast.success("Student marked as transferred.");
       setConfirmDeactivate(null);
+      reload(currentPage);
     } else {
       toast.error(res.payload || "Operation failed.");
       setConfirmDeactivate(null);
+    }
+  };
+
+  const handleDelete = async (target) => {
+    if (!target?._id) return;
+    const res = await dispatch(deleteStudent(target._id));
+    if (deleteStudent.fulfilled.match(res)) {
+      toast.success(`${target.userId?.name || "Student"} deleted successfully.`);
+      setConfirmDelete(null);
+      reload(currentPage);
+    } else {
+      toast.error(res.payload || "Failed to delete student.");
+      setConfirmDelete(null);
     }
   };
 
@@ -261,26 +277,33 @@ const StudentList = () => {
                           <button
                             onClick={() => navigate(`/admin/students/${s._id}`)}
                             className="p-1.5 rounded-lg text-slate-400 hover:bg-sky-50 hover:text-sky-600 transition-colors"
-                            title="View profile"
+                            title="View Profile"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => { setEditTarget(s); setModalOpen(true); }}
                             className="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-[#1F4E79] transition-colors"
-                            title="Edit"
+                            title="Edit Student"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
                           {s.status === "active" && (
                             <button
-                              onClick={() => setConfirmDeactivate(s._id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                              title="Deactivate"
+                              onClick={() => setConfirmDeactivate(s)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
+                              title="Mark Transferred"
                             >
                               <UserX className="w-4 h-4" />
                             </button>
                           )}
+                          <button
+                            onClick={() => setConfirmDelete(s)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            title="Delete Student"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -321,15 +344,15 @@ const StudentList = () => {
         <StudentForm editData={editTarget} onClose={handleModalClose} />
       )}
 
-      {/* Confirm deactivate */}
+      {/* Confirm deactivate / mark transferred */}
       {confirmDeactivate && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h3 className="text-base font-semibold text-slate-800 mb-2">
-              Deactivate Student?
+              Mark Student as Transferred?
             </h3>
             <p className="text-sm text-slate-500 mb-5">
-              The student will be marked as Transferred and their login deactivated.
+              The student will be marked as Transferred and their active school status will be disabled.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -340,9 +363,44 @@ const StudentList = () => {
               </button>
               <button
                 onClick={() => handleDeactivate(confirmDeactivate)}
+                className="px-4 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm delete permanently */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-3 text-red-600">
+              <div className="p-2.5 bg-red-100 rounded-full">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-semibold text-slate-800">Delete Student?</h3>
+            </div>
+            <p className="text-sm text-slate-500 mb-5">
+              Are you sure you want to permanently delete{" "}
+              <span className="font-semibold text-slate-700">
+                {confirmDelete.userId?.name || "this student"}
+              </span>
+              ? This action will permanently remove their academic records, enrollment, and login account from the school system.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDelete)}
                 className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                Deactivate
+                Delete Permanently
               </button>
             </div>
           </div>

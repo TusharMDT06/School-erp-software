@@ -383,22 +383,24 @@ const updateStudent = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════════════════
-//  DELETE /api/students/:id  (soft delete)
+//  DELETE /api/students/:id  (permanently delete student & linked user)
 // ══════════════════════════════════════════════════════════════════════════
 const deleteStudent = async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) throw new ApiError(404, "Student not found.");
 
-    // Soft delete: mark as transferred + deactivate user (if user exists)
-    await Student.findByIdAndUpdate(req.params.id, { status: "transferred" });
+    // 1. Delete linked user account so their login is removed
     if (student.userId) {
-      await User.findByIdAndUpdate(student.userId, { isActive: false });
+      await User.findByIdAndDelete(student.userId);
     }
+
+    // 2. Delete the student document
+    await Student.findByIdAndDelete(req.params.id);
 
     return res
       .status(200)
-      .json(new ApiResponse(200, null, "Student deactivated successfully."));
+      .json(new ApiResponse(200, null, "Student deleted successfully."));
   } catch (err) {
     next(err);
   }

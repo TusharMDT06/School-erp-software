@@ -97,9 +97,8 @@ const studentSlice = createSlice({
     });
 
     builder.addCase(deleteStudent.fulfilled, (state, action) => {
-      // Soft delete: update status in-place rather than removing from list
-      const idx = state.students.findIndex((s) => s._id === action.payload);
-      if (idx !== -1) state.students[idx].status = "transferred";
+      state.students = state.students.filter((s) => s._id !== action.payload);
+      state.totalCount = Math.max(0, state.totalCount - 1);
     });
   },
 });
