@@ -27,12 +27,12 @@ const ROLE_REDIRECT = {
 
 // ── Demo Accounts for Recruiter ────────────────────────────────────────────
 const DEMO_ACCOUNTS = [
-  { label: "Admin", role: "superadmin", email: "demo@school.edu", password: "Password@123", icon: "👑" },
-  { label: "Principal", role: "admin", email: "principal@school.edu", password: "Admin@123", icon: "🏫" },
-  { label: "Teacher", role: "teacher", email: "vikram.maths@school.edu", password: "Password@123", icon: "👩‍🏫" },
-  { label: "Student", role: "student", email: "aarav.student@school.edu", password: "Password@123", icon: "🎓" },
-  { label: "Parent", role: "parent", email: "parent@school.edu", password: "Password@123", icon: "👨‍👩‍👦" },
-  { label: "Accountant", role: "accountant", email: "accountant@school.edu", password: "Password@123", icon: "💰" },
+  { label: "Admin", role: "superadmin", email: "demo@school.edu", password: "Password@123" },
+  { label: "Principal", role: "admin", email: "principal@school.edu", password: "Admin@123" },
+  { label: "Teacher", role: "teacher", email: "vikram.maths@school.edu", password: "Password@123" },
+  { label: "Student", role: "student", email: "aarav.student@school.edu", password: "Password@123" },
+  { label: "Parent", role: "parent", email: "parent@school.edu", password: "Password@123" },
+  { label: "Accountant", role: "accountant", email: "accountant@school.edu", password: "Password@123" },
 ];
 
 const Login = () => {
@@ -125,11 +125,10 @@ const Login = () => {
                   type="button"
                   disabled={loading}
                   onClick={() => handleQuickLogin(acc)}
-                  className="px-2 py-1.5 text-xs font-medium bg-white hover:bg-blue-50/80 text-slate-700 hover:text-[#1F4E79] border border-slate-200 hover:border-blue-300 rounded-lg shadow-xs transition-all flex items-center justify-center gap-1 group active:scale-95 disabled:opacity-50"
+                  className="px-2.5 py-1.5 text-xs font-semibold bg-white hover:bg-blue-50/80 text-slate-700 hover:text-[#1F4E79] border border-slate-200 hover:border-blue-300 rounded-lg shadow-xs transition-all flex items-center justify-center text-center active:scale-95 disabled:opacity-50"
                   title={`Login as ${acc.label} (${acc.email})`}
                 >
-                  <span className="text-xs group-hover:scale-110 transition-transform">{acc.icon}</span>
-                  <span className="font-medium text-[11px] truncate">{acc.label}</span>
+                  <span className="text-[12px] truncate">{acc.label}</span>
                 </button>
               ))}
             </div>
