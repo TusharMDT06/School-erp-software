@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock } from "lucide-react";
 import { useState } from "react";
 import { loginUser, clearError } from "../../features/auth/authSlice";
 
@@ -107,8 +107,7 @@ const Login = () => {
           {/* Quick Demo Access for Recruiters & Reviewers */}
           <div className="mb-5 p-3 bg-gradient-to-br from-slate-50 to-blue-50/60 border border-blue-100 rounded-xl">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-bold text-[#1F4E79] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+              <span className="text-xs font-bold text-[#1F4E79]">
                 Recruiter Quick Demo Access
               </span>
               <span className="text-[10px] text-blue-700 bg-blue-100/80 font-semibold px-2 py-0.5 rounded-full">
