@@ -15,6 +15,8 @@ const resultRoutes = require("./routes/result.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const schoolRoutes = require("./routes/school.routes");
 const aiAssistantRoutes = require("./routes/aiAssistant.routes");
+const leaveRequestRoutes = require("./routes/leaveRequest.routes");
+const twilioWebhookRoutes = require("./routes/twilioWebhook.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -85,6 +87,8 @@ app.use("/api/results", resultRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/ai", aiAssistantRoutes);
+app.use("/api/leaves", leaveRequestRoutes);
+app.use("/api/webhooks/twilio", twilioWebhookRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

@@ -5,9 +5,11 @@ const FeeStructure = require("../models/FeeStructure.model");
 const FeeTransaction = require("../models/FeeTransaction.model");
 const Student = require("../models/Student.model");
 const ClassSection = require("../models/ClassSection.model");
+const CallLog = require("../models/CallLog.model");
 const razorpay = require("../config/razorpay");
 const generateReceipt = require("../utils/generateReceipt");
 const sendFeeReminder = require("../utils/sendFeeReminder");
+const { sendParentAlert } = require("../services/parentAlert.service");
 const { getIO } = require("../config/socket");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
 
@@ -383,6 +385,29 @@ const getFeeDefaulters = async (req, res, next) => {
       .sort({ createdAt: -1 });
 
     const now = new Date();
+    const txIds = transactions.map((t) => t._id);
+
+    // Query latest CallLog for these transactions
+    const callLogs = await CallLog.find({
+      reason: "fee_overdue",
+      relatedEntityId: { $in: txIds },
+    }).sort({ createdAt: -1 });
+
+    const callLogMap = {};
+    for (const log of callLogs) {
+      const key = log.relatedEntityId.toString();
+      if (!callLogMap[key]) {
+        callLogMap[key] = {
+          _id: log._id,
+          callStatus: log.callStatus,
+          smsFallbackSent: log.smsFallbackSent,
+          smsFallbackStatus: log.smsFallbackStatus,
+          whatsappFallbackSent: log.whatsappFallbackSent,
+          whatsappFallbackStatus: log.whatsappFallbackStatus,
+          createdAt: log.createdAt,
+        };
+      }
+    }
 
     const defaulters = transactions
       .filter((tx) => tx.studentId != null && tx.feeStructureId != null)
@@ -391,6 +416,7 @@ const getFeeDefaulters = async (req, res, next) => {
         const diffTime = now - dueDate;
         const daysOverdue = diffTime > 0 ? Math.floor(diffTime / (1000 * 60 * 60 * 24)) : 0;
         const pendingAmount = Math.max(0, tx.amountDue - tx.amountPaid);
+        const latestCallAlert = callLogMap[tx._id.toString()] || null;
 
         return {
           transactionId: tx._id,
@@ -411,6 +437,8 @@ const getFeeDefaulters = async (req, res, next) => {
           dueDate: tx.feeStructureId.dueDate,
           daysOverdue,
           status: daysOverdue > 0 && tx.status === "pending" ? "overdue" : tx.status,
+          latestCallAlert,
+          hasRecentCallAlert: Boolean(latestCallAlert),
         };
       })
       .sort((a, b) => b.pendingAmount - a.pendingAmount);
@@ -442,6 +470,67 @@ const triggerManualReminder = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/fees/trigger-call-alert/:transactionId
+ * Triggers an immediate automated Hindi voice call alert (with SMS & WhatsApp fallback)
+ * for a specific overdue fee transaction.
+ */
+const triggerFeeOverdueCallAlert = async (req, res, next) => {
+  try {
+    const { transactionId } = req.params;
+    const tx = await FeeTransaction.findById(transactionId)
+      .populate("feeStructureId")
+      .populate({
+        path: "studentId",
+        populate: [
+          { path: "userId", select: "name phone email" },
+          { path: "guardianIds", select: "name phone email" },
+        ],
+      });
+
+    if (!tx) {
+      throw new ApiError(404, "Fee transaction invoice not found.");
+    }
+
+    const student = tx.studentId;
+    const studentName = student?.name || student?.userId?.name || "Student";
+    const primaryGuardian =
+      Array.isArray(student?.guardianIds) && student.guardianIds.length > 0
+        ? student.guardianIds[0]
+        : null;
+
+    const parentPhone = primaryGuardian?.phone || student?.userId?.phone;
+    const parentUserId = primaryGuardian?._id || student?.userId?._id;
+
+    if (!parentPhone || !parentUserId) {
+      throw new ApiError(400, "No valid phone number found for student or guardian.");
+    }
+
+    const remainingAmount = Math.max(0, tx.amountDue - tx.amountPaid);
+    const callLog = await sendParentAlert({
+      parentUserId,
+      parentPhone,
+      studentName,
+      reason: "fee_overdue",
+      relatedEntityId: tx._id,
+      contextData: {
+        amountDue: remainingAmount,
+        dueDate: tx.feeStructureId?.dueDate,
+      },
+    });
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        callLog,
+        "Automated voice call alert dispatched. Will fallback to SMS & WhatsApp if unanswered."
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createFeeStructure,
   getFeeStructuresByClass,
@@ -451,4 +540,5 @@ module.exports = {
   getReceiptPdf,
   getFeeDefaulters,
   triggerManualReminder,
+  triggerFeeOverdueCallAlert,
 };

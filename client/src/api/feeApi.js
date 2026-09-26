@@ -62,3 +62,12 @@ export const triggerManualReminderApi = async (studentId) => {
   const response = await axiosInstance.post(`/fees/reminder/${studentId}`);
   return response.data;
 };
+
+/**
+ * POST /fees/trigger-call-alert/:transactionId
+ * Triggers an automated voice call alert (with SMS & WhatsApp fallback) for an overdue fee.
+ */
+export const triggerFeeOverdueCallAlertApi = async (transactionId) => {
+  const response = await axiosInstance.post(`/fees/trigger-call-alert/${transactionId}`);
+  return response.data;
+};

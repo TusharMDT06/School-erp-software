@@ -26,6 +26,7 @@ import {
   Send,
   BarChart3,
   Sparkles,
+  CalendarCheck,
 } from "lucide-react";
 
 // ── Nav config per role ────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ const NAV_ITEMS = {
     { icon: UserCheck,       label: "Teachers",        path: "/admin/teachers" },
     { icon: BookOpen,        label: "Classes",         path: "/admin/classes" },
     { icon: ClipboardList,   label: "Attendance",      path: "/admin/attendance" },
+    { icon: CalendarCheck,   label: "Leave Approvals", path: "/admin/leaves" },
     { icon: DollarSign,      label: "Fee Structures",  path: "/admin/fees" },
     { icon: AlertTriangle,   label: "Fee Defaulters",  path: "/admin/fees/defaulters" },
     { icon: Award,           label: "Exams Setup",     path: "/admin/exams" },
@@ -49,6 +51,7 @@ const NAV_ITEMS = {
     { icon: UserCheck,       label: "Teachers",        path: "/admin/teachers" },
     { icon: BookOpen,        label: "Classes",         path: "/admin/classes" },
     { icon: ClipboardList,   label: "Attendance",      path: "/admin/attendance" },
+    { icon: CalendarCheck,   label: "Leave Approvals", path: "/admin/leaves" },
     { icon: DollarSign,      label: "Fee Structures",  path: "/admin/fees" },
     { icon: AlertTriangle,   label: "Fee Defaulters",  path: "/admin/fees/defaulters" },
     { icon: Award,           label: "Exams Setup",     path: "/admin/exams" },

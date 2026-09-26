@@ -10,6 +10,7 @@ const {
   getReceiptPdf,
   getFeeDefaulters,
   triggerManualReminder,
+  triggerFeeOverdueCallAlert,
 } = require("../controllers/fee.controller");
 
 const router = express.Router();
@@ -63,6 +64,12 @@ router.post(
   "/reminder/:studentId",
   authorizeRoles("admin", "superadmin", "accountant"),
   triggerManualReminder
+);
+
+router.post(
+  "/trigger-call-alert/:transactionId",
+  authorizeRoles("admin", "superadmin", "accountant"),
+  triggerFeeOverdueCallAlert
 );
 
 module.exports = router;

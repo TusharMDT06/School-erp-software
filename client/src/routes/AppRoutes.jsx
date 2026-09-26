@@ -33,6 +33,7 @@ import SettingsPage from "../pages/admin/SettingsPage";
 
 // ── Phase 3: Attendance Pages ─────────────────────────────────────────────────
 import AttendanceReports from "../pages/admin/AttendanceReports";
+import LeaveApprovals from "../pages/admin/LeaveApprovals";
 import MarkAttendance from "../pages/teacher/MarkAttendance";
 import MyAttendance from "../pages/student/MyAttendance";
 import ChildAttendance from "../pages/parent/ChildAttendance";
@@ -77,8 +78,9 @@ const AppRoutes = () => {
           <Route path="/admin/students" element={<StudentList />} />
           <Route path="/admin/students/:id" element={<StudentProfile />} />
 
-          {/* Attendance Reports */}
+          {/* Attendance Reports & Leave Approvals */}
           <Route path="/admin/attendance" element={<AttendanceReports />} />
+          <Route path="/admin/leaves" element={<LeaveApprovals />} />
 
           {/* Fees & Finance */}
           <Route path="/admin/fees" element={<FeeStructureSetup />} />

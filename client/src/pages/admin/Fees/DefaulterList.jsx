@@ -8,10 +8,14 @@ import {
   Download,
   Loader2,
   Phone,
+  PhoneCall,
+  PhoneForwarded,
+  PhoneOff,
   Calendar,
   CheckCircle,
 } from "lucide-react";
 import { getClassesApi } from "../../../api/classApi";
+import { triggerFeeOverdueCallAlertApi } from "../../../api/feeApi";
 import {
   fetchFeeDefaulters,
   sendFeeReminderManual,
@@ -24,6 +28,7 @@ const DefaulterList = () => {
   const [classes, setClasses] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [sendingReminderId, setSendingReminderId] = useState(null);
+  const [callingTxId, setCallingTxId] = useState(null);
 
   // Load class list for filtering
   useEffect(() => {
@@ -44,7 +49,7 @@ const DefaulterList = () => {
     dispatch(fetchFeeDefaulters(selectedClassId ? { classId: selectedClassId } : {}));
   }, [selectedClassId, dispatch]);
 
-  // Send single reminder
+  // Send single email reminder
   const handleSendReminder = async (studentId) => {
     try {
       setSendingReminderId(studentId);
@@ -54,6 +59,23 @@ const DefaulterList = () => {
       toast.error(err || "Failed to send fee reminder.");
     } finally {
       setSendingReminderId(null);
+    }
+  };
+
+  // Trigger automated voice call + SMS/WhatsApp fallback
+  const handleTriggerCall = async (transactionId) => {
+    try {
+      setCallingTxId(transactionId);
+      const res = await triggerFeeOverdueCallAlertApi(transactionId);
+      toast.success(
+        res.message || "Automated voice call alert initiated! Will fallback to SMS & WhatsApp if unanswered."
+      );
+      // Refresh list to update CallLog indicator
+      dispatch(fetchFeeDefaulters(selectedClassId ? { classId: selectedClassId } : {}));
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to initiate call alert.");
+    } finally {
+      setCallingTxId(null);
     }
   };
 
@@ -203,6 +225,7 @@ const DefaulterList = () => {
                   <th className="py-3.5 px-4 text-right">Balance</th>
                   <th className="py-3.5 px-4 text-center">Due Date</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-4 text-center">Call Outreach</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -243,21 +266,95 @@ const DefaulterList = () => {
                         {item.status}
                       </span>
                     </td>
+                    <td className="py-3 px-4 text-center">
+                      {item.hasRecentCallAlert && item.latestCallAlert ? (
+                        <div className="inline-flex flex-col items-center gap-1">
+                          {item.latestCallAlert.callStatus === "completed" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <PhoneCall className="w-3 h-3 text-emerald-600" />
+                              Answered
+                            </span>
+                          )}
+                          {item.latestCallAlert.callStatus === "initiated" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200 animate-pulse">
+                              <PhoneForwarded className="w-3 h-3 text-sky-600" />
+                              In Progress
+                            </span>
+                          )}
+                          {["failed", "no-answer", "busy"].includes(item.latestCallAlert.callStatus) && (
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                <PhoneOff className="w-3 h-3 text-amber-600" />
+                                {item.latestCallAlert.callStatus === "no-answer" ? "No Answer" : item.latestCallAlert.callStatus}
+                              </span>
+                              <div className="flex items-center gap-1 text-[10px]">
+                                <span
+                                  className={`px-1.5 py-0.5 rounded font-medium ${
+                                    item.latestCallAlert.smsFallbackStatus === "sent"
+                                      ? "bg-slate-100 text-slate-700"
+                                      : "bg-rose-50 text-rose-600"
+                                  }`}
+                                >
+                                  SMS: {item.latestCallAlert.smsFallbackStatus}
+                                </span>
+                                <span
+                                  className={`px-1.5 py-0.5 rounded font-medium ${
+                                    item.latestCallAlert.whatsappFallbackStatus === "sent"
+                                      ? "bg-emerald-50 text-emerald-700"
+                                      : "bg-slate-100 text-slate-500"
+                                  }`}
+                                >
+                                  WA: {item.latestCallAlert.whatsappFallbackStatus}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(item.latestCallAlert.createdAt).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-50 text-slate-400 border border-slate-200">
+                          <Phone className="w-2.5 h-2.5 text-slate-400" />
+                          Not called yet
+                        </span>
+                      )}
+                    </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleSendReminder(item.studentId)}
-                        disabled={sendingReminderId === item.studentId}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F4E79]/10 hover:bg-[#1F4E79] hover:text-white text-[#1F4E79] text-xs font-semibold rounded-xl transition shadow-2xs disabled:opacity-50"
-                        title="Send Email Reminder"
-                      >
-                        {sendingReminderId === item.studentId ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Mail className="w-3.5 h-3.5" />
-                        )}
-                        Remind
-                      </button>
+                      <div className="inline-flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleSendReminder(item.studentId)}
+                          disabled={sendingReminderId === item.studentId}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#1F4E79]/10 hover:bg-[#1F4E79] hover:text-white text-[#1F4E79] text-xs font-semibold rounded-xl transition shadow-2xs disabled:opacity-50"
+                          title="Send Email Reminder"
+                        >
+                          {sendingReminderId === item.studentId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Mail className="w-3.5 h-3.5" />
+                          )}
+                          Email
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleTriggerCall(item.transactionId)}
+                          disabled={callingTxId === item.transactionId}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-semibold rounded-xl border border-emerald-200 transition shadow-2xs disabled:opacity-50"
+                          title="Initiate Voice Call + Backup SMS/WhatsApp"
+                        >
+                          {callingTxId === item.transactionId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <PhoneCall className="w-3.5 h-3.5" />
+                          )}
+                          Call Alert
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
