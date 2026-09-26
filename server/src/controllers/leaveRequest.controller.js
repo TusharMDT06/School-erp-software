@@ -1,8 +1,7 @@
 const LeaveRequest = require("../models/LeaveRequest.model");
 const Student = require("../models/Student.model");
 const User = require("../models/User.model");
-const ApiError = require("../utils/ApiError");
-const ApiResponse = require("../utils/ApiResponse");
+const { ApiError, ApiResponse } = require("../utils/apiResponse");
 const sendEmail = require("../utils/sendEmail");
 const { getIO } = require("../config/socket");
 const { sendParentAlert } = require("../services/parentAlert.service");
