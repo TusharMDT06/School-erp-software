@@ -85,6 +85,7 @@ async function makeCall({ parentUserId, parentPhone, message, reason, relatedEnt
       to: formattedPhone,
       from: process.env.TWILIO_PHONE_NUMBER,
       url: twimlUrl,
+      method: "GET",
     };
 
     const call = await twilioClient.calls.create(callOptions);

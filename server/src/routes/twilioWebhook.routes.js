@@ -88,18 +88,22 @@ router.post("/call-status", validateTwilioSignature, async (req, res) => {
 });
 
 /**
- * GET /api/webhooks/twilio/twiml
+ * GET & POST /api/webhooks/twilio/twiml
  * Returns TwiML XML for an outbound voice call.
- * Twilio fetches this URL when the call connects to get speech instructions.
+ * Twilio fetches this URL (via POST by default, or GET) when the call connects.
  * Using `url` instead of inline `twiml` avoids trial account parameter restrictions.
  *
- * Query params:
- *   msg  - The message to speak (URL-encoded)
+ * Query/Body params:
+ *   msg  - The message to speak (URL-encoded or Devanagari text)
  */
-router.get("/twiml", (req, res) => {
-  const rawMsg = req.query.msg || "Namaste. Yeh School ERP se automated call hai.";
+router.all("/twiml", (req, res) => {
+  const rawMsg =
+    req.query.msg ||
+    req.body?.msg ||
+    "नमस्ते। यह स्कूल ईआरपी से स्वचालित कॉल है।";
+
   // Sanitize XML special characters
-  const safeMsg = rawMsg
+  const safeMsg = String(rawMsg)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
