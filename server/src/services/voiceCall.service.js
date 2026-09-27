@@ -78,16 +78,14 @@ async function makeCall({ parentUserId, parentPhone, message, reason, relatedEnt
     .replace(/>/g, "&gt;");
 
   try {
+    // Use hosted TwiML URL — inline `twiml` param is restricted on Twilio trial accounts
+    const twimlUrl = `${serverUrl}/api/webhooks/twilio/twiml?msg=${encodeURIComponent(message)}`;
+
     const callOptions = {
       to: formattedPhone,
       from: process.env.TWILIO_PHONE_NUMBER,
-      twiml: `<Response><Say voice="Polly.Aditi" language="hi-IN">${safeMessage}</Say></Response>`,
-      statusCallbackEvent: ["completed", "no-answer", "busy", "failed"],
+      url: twimlUrl,
     };
-
-    if (statusCallbackUrl) {
-      callOptions.statusCallback = statusCallbackUrl;
-    }
 
     const call = await twilioClient.calls.create(callOptions);
 
