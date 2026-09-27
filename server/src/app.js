@@ -17,6 +17,7 @@ const schoolRoutes = require("./routes/school.routes");
 const aiAssistantRoutes = require("./routes/aiAssistant.routes");
 const leaveRequestRoutes = require("./routes/leaveRequest.routes");
 const twilioWebhookRoutes = require("./routes/twilioWebhook.routes");
+const teacherAttendanceRoutes = require("./routes/teacherAttendance.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -89,6 +90,7 @@ app.use("/api/schools", schoolRoutes);
 app.use("/api/ai", aiAssistantRoutes);
 app.use("/api/leaves", leaveRequestRoutes);
 app.use("/api/webhooks/twilio", twilioWebhookRoutes);
+app.use("/api/teacher-attendance", teacherAttendanceRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

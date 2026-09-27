@@ -22,6 +22,8 @@ import ClassList from "../pages/admin/Classes/ClassList";
 
 // ── Admin: Teachers ────────────────────────────────────────────────────────────
 import TeacherList from "../pages/admin/Teachers/TeacherList";
+import TeacherAttendancePage from "../pages/admin/TeacherAttendance";
+import TeacherSalaryPage from "../pages/admin/TeacherSalary";
 
 // ── Admin: Students ────────────────────────────────────────────────────────────
 import StudentList from "../pages/admin/Students/StudentList";
@@ -73,6 +75,8 @@ const AppRoutes = () => {
 
           {/* Teachers */}
           <Route path="/admin/teachers" element={<TeacherList />} />
+          <Route path="/admin/teachers/attendance" element={<TeacherAttendancePage />} />
+          <Route path="/admin/teachers/salary" element={<TeacherSalaryPage />} />
 
           {/* Students */}
           <Route path="/admin/students" element={<StudentList />} />
