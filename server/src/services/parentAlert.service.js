@@ -74,18 +74,18 @@ async function sendParentAlert({
       return existingLog;
     }
 
-    // 2. Build the appropriate Hindi voice/text message
+    // 2. Build the appropriate Hindi voice/text message (Devanagari for Polly.Aditi)
     let message = "";
     if (reason === "leave_approved") {
       const fromDate = formatDateStr(contextData.fromDate);
       const toDate = formatDateStr(contextData.toDate);
-      message = `Namaste. Yeh School ERP se automated call hai. Aapke bacche ${studentName} ka leave ${fromDate} se ${toDate} tak approve ho gaya hai. Dhanyavaad.`;
+      message = `नमस्ते। यह स्कूल ईआरपी से स्वचालित कॉल है। आपके बच्चे ${studentName} का अवकाश ${fromDate} से ${toDate} तक स्वीकृत हो गया है। धन्यवाद।`;
     } else if (reason === "fee_overdue") {
       const amountDue = contextData.amountDue
         ? Number(contextData.amountDue).toLocaleString("en-IN")
-        : "kuchh";
+        : "कुछ";
       const dueDate = formatDateStr(contextData.dueDate);
-      message = `Namaste. Yeh School ERP se automated call hai. Aapke bacche ${studentName} ki fee ${amountDue} rupaye ${dueDate} se pending hai. Kripya jald se jald bhugtan karein. Dhanyavaad.`;
+      message = `नमस्ते। यह स्कूल ईआरपी से स्वचालित कॉल है। आपके बच्चे ${studentName} की फीस ${amountDue} रुपये ${dueDate} से बकाया है। कृपया जल्द से जल्द भुगतान करें। धन्यवाद।`;
     } else {
       console.warn(`[ParentAlert] Unknown reason: ${reason}`);
       return null;
