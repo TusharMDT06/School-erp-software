@@ -41,52 +41,104 @@ const TeacherAttendancePage = () => {
   const loadTeachers = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getTeachersApi();
-      const list = res?.data || [];
+      const res = await getTeachersApi({ limit: 500 });
+      const list = Array.isArray(res?.data?.data)
+        ? res.data.data
+        : Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.teachers)
+        ? res.data.teachers
+        : [];
       setTeachers(list);
-      const init = {};
-      list.forEach((t) => { init[t._id] = { status: "present", remarks: "" }; });
-      setRecords(init);
-    } catch {
+    } catch (err) {
+      console.error("Error loading teachers:", err);
       toast.error("Failed to load teachers.");
+      setTeachers([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const loadExisting = useCallback(async (d) => {
+  const loadExisting = useCallback(async (d, teacherList) => {
+    const listToUse = teacherList || teachers;
+    if (!Array.isArray(listToUse) || listToUse.length === 0) return;
     try {
       const res = await getTeacherAttendanceByDateApi(d);
-      const existing = res?.data || [];
-      if (!existing.length) return;
-      setRecords((prev) => {
-        const updated = { ...prev };
-        existing.forEach((rec) => {
-          const tid = rec.teacherId?._id || rec.teacherId;
-          if (updated[tid]) updated[tid] = { status: rec.status, remarks: rec.remarks || "" };
-        });
-        return updated;
-      });
-    } catch (_) {}
-  }, []);
+      const existing = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : [];
 
-  useEffect(() => { loadTeachers(); }, [loadTeachers]);
-  useEffect(() => { if (teachers.length > 0) loadExisting(date); }, [date, teachers.length, loadExisting]);
+      const updated = {};
+      listToUse.forEach((t) => {
+        if (t && t._id) {
+          updated[t._id] = { status: "present", remarks: "" };
+        }
+      });
+
+      existing.forEach((rec) => {
+        const tid = String(rec.teacherId?._id || rec.teacherId || "");
+        if (tid && updated[tid]) {
+          updated[tid] = {
+            status: rec.status || "present",
+            remarks: rec.remarks || "",
+          };
+        }
+      });
+
+      setRecords(updated);
+    } catch (err) {
+      console.error("Error loading attendance for date:", err);
+    }
+  }, [teachers]);
+
+  useEffect(() => {
+    loadTeachers();
+  }, [loadTeachers]);
+
+  useEffect(() => {
+    if (Array.isArray(teachers) && teachers.length > 0) {
+      loadExisting(date, teachers);
+    }
+  }, [date, teachers, loadExisting]);
+
   useEffect(() => {
     const s = { present: 0, absent: 0, late: 0, leave: 0, holiday: 0 };
-    Object.values(records).forEach((r) => { if (s[r.status] !== undefined) s[r.status]++; });
+    Object.values(records).forEach((r) => {
+      if (r && s[r.status] !== undefined) s[r.status]++;
+    });
     setStats(s);
   }, [records]);
 
-  const setStatus  = (tid, status)  => setRecords((p) => ({ ...p, [tid]: { ...p[tid], status } }));
-  const setRemarks = (tid, remarks) => setRecords((p) => ({ ...p, [tid]: { ...p[tid], remarks } }));
-  const markAll    = (status) => {
+  const setStatus = (tid, status) =>
+    setRecords((p) => ({
+      ...p,
+      [tid]: { ...(p[tid] || { remarks: "" }), status },
+    }));
+
+  const setRemarks = (tid, remarks) =>
+    setRecords((p) => ({
+      ...p,
+      [tid]: { ...(p[tid] || { status: "present" }), remarks },
+    }));
+
+  const markAll = (status) => {
+    if (!Array.isArray(teachers)) return;
     const u = {};
-    teachers.forEach((t) => { u[t._id] = { ...records[t._id], status }; });
+    teachers.forEach((t) => {
+      if (t && t._id) {
+        u[t._id] = { ...(records[t._id] || { remarks: "" }), status };
+      }
+    });
     setRecords(u);
   };
 
   const handleSubmit = async () => {
+    if (!Array.isArray(teachers) || teachers.length === 0) {
+      toast.error("No teachers found.");
+      return;
+    }
     const payload = teachers.map((t) => ({
       teacherId: t._id,
       status: records[t._id]?.status || "present",
@@ -171,7 +223,7 @@ const TeacherAttendancePage = () => {
       </div>
 
       {/* Table */}
-      {teachers.length === 0 ? (
+      {!Array.isArray(teachers) || teachers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400">
           <Users className="w-12 h-12 mb-3 opacity-40" />
           <p className="text-sm">No teachers found. Add teachers first.</p>

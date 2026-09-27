@@ -36,9 +36,15 @@ const TeacherSalaryPage = () => {
     try {
       setLoading(true);
       const res = await getTeacherSalaryApi({ month, year });
-      setData(res?.data || []);
+      const salaryList = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : [];
+      setData(salaryList);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to load salary data.");
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -46,7 +52,7 @@ const TeacherSalaryPage = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const totals = data.reduce(
+  const totals = (Array.isArray(data) ? data : []).reduce(
     (acc, d) => ({
       base:       acc.base       + (d.baseSalary      || 0),
       deductions: acc.deductions + (d.totalDeduction  || 0),
@@ -56,7 +62,7 @@ const TeacherSalaryPage = () => {
   );
 
   const handleExport = () => {
-    if (!data.length) return toast.error("No data to export.");
+    if (!Array.isArray(data) || !data.length) return toast.error("No data to export.");
     const rows = [
       ["Emp. ID", "Name", "Email", "Base Salary", "Days", "Present", "Absent", "Late", "Leave", "Absent Deduction", "Leave Deduction", "Late Deduction", "Total Deduction", "Net Salary"],
       ...data.map((d) => [

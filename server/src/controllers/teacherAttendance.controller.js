@@ -68,10 +68,20 @@ const sendAbsentEmail = async (teacher, date) => {
 exports.markTeacherAttendance = async (req, res, next) => {
   try {
     const { date, records } = req.body;
-    const schoolId = req.user.schoolId;
+    let schoolId = req.user.schoolId;
 
     if (!date || !Array.isArray(records) || records.length === 0) {
       throw new ApiError(400, "date and records[] are required.");
+    }
+
+    if (!schoolId && records.length > 0) {
+      const firstTeacher = await Teacher.findById(records[0]?.teacherId).populate("userId");
+      schoolId = firstTeacher?.userId?.schoolId;
+      if (!schoolId) {
+        const School = require("../models/School.model");
+        const defaultSchool = await School.findOne();
+        schoolId = defaultSchool?._id;
+      }
     }
 
     const normalizedDate = toMidnightUTC(date);
@@ -147,10 +157,10 @@ exports.getTeacherAttendanceByDate = async (req, res, next) => {
 
     const normalizedDate = toMidnightUTC(date);
 
-    const records = await TeacherAttendance.find({
-      schoolId,
-      date: normalizedDate,
-    })
+    const filter = { date: normalizedDate };
+    if (schoolId) filter.schoolId = schoolId;
+
+    const records = await TeacherAttendance.find(filter)
       .populate({
         path: "teacherId",
         select: "employeeId subjects",
@@ -181,18 +191,17 @@ exports.getTeacherAttendanceSummary = async (req, res, next) => {
     const startDate = new Date(Date.UTC(y, m - 1, 1));
     const endDate = new Date(Date.UTC(y, m, 1));
 
+    const mongoose = require("mongoose");
     const matchQuery = {
-      schoolId: require("mongoose").Types.ObjectId.createFromHexString
-        ? require("mongoose").Types.ObjectId.createFromHexString(String(schoolId))
-        : schoolId,
       date: { $gte: startDate, $lt: endDate },
     };
 
-    if (teacherId) {
-      const mongoose = require("mongoose");
-      matchQuery.teacherId = mongoose.Types.ObjectId.createFromHexString
-        ? mongoose.Types.ObjectId.createFromHexString(teacherId)
-        : teacherId;
+    if (schoolId && mongoose.Types.ObjectId.isValid(schoolId)) {
+      matchQuery.schoolId = new mongoose.Types.ObjectId(schoolId);
+    }
+
+    if (teacherId && mongoose.Types.ObjectId.isValid(teacherId)) {
+      matchQuery.teacherId = new mongoose.Types.ObjectId(teacherId);
     }
 
     const summary = await TeacherAttendance.aggregate([
@@ -266,7 +275,9 @@ exports.getTeacherSalary = async (req, res, next) => {
     const daysInMonth = new Date(y, m, 0).getDate();
 
     // Get all User accounts with role=teacher belonging to this school
-    const teacherUsers = await User.find({ role: "teacher", schoolId }).select("_id name email phone").lean();
+    const userFilter = { role: "teacher" };
+    if (schoolId) userFilter.schoolId = schoolId;
+    const teacherUsers = await User.find(userFilter).select("_id name email phone").lean();
     const userIds = teacherUsers.map((u) => u._id);
 
     // Get Teacher profiles for these users
