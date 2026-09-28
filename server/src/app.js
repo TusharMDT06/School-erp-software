@@ -18,6 +18,22 @@ const aiAssistantRoutes = require("./routes/aiAssistant.routes");
 const leaveRequestRoutes = require("./routes/leaveRequest.routes");
 const twilioWebhookRoutes = require("./routes/twilioWebhook.routes");
 const teacherAttendanceRoutes = require("./routes/teacherAttendance.routes");
+const accountantRoutes = require("./routes/accountant.routes");
+const concessionRoutes = require("./routes/concession.routes");
+const refundRoutes = require("./routes/refund.routes");
+const financeSettingsRoutes = require("./routes/financeSettings.routes");
+const vendorRoutes = require("./routes/vendor.routes");
+const expenseCategoryRoutes = require("./routes/expenseCategory.routes");
+const expenseRoutes = require("./routes/expense.routes");
+const budgetRoutes = require("./routes/budget.routes");
+const ledgerRoutes = require("./routes/ledger.routes");
+const cashClosingRoutes = require("./routes/cashClosing.routes");
+const salaryStructureRoutes = require("./routes/salaryStructure.routes");
+const payrollRoutes = require("./routes/payroll.routes");
+const reportRoutes = require("./routes/report.routes");
+const reconciliationRoutes = require("./routes/reconciliation.routes");
+const razorpayWebhookRoutes = require("./routes/razorpayWebhook.routes");
+const auditLogRoutes = require("./routes/auditLog.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -63,8 +79,28 @@ app.use(
   })
 );
 
+// ─── Public Razorpay Webhook (Raw Body for HMAC SHA256 verification) ─────
+app.use(
+  "/api/webhooks/razorpay",
+  express.raw({ type: "application/json" }),
+  (req, res, next) => {
+    if (Buffer.isBuffer(req.body)) {
+      req.rawBody = req.body;
+    }
+    next();
+  },
+  razorpayWebhookRoutes
+);
+
 // ─── Body Parsers ──────────────────────────────────────────────────────────
-app.use(express.json({ limit: "10mb" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -88,9 +124,25 @@ app.use("/api/results", resultRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/ai", aiAssistantRoutes);
+app.use("/api/ai-chat", aiAssistantRoutes);
 app.use("/api/leaves", leaveRequestRoutes);
 app.use("/api/webhooks/twilio", twilioWebhookRoutes);
 app.use("/api/teacher-attendance", teacherAttendanceRoutes);
+app.use("/api/accountant", accountantRoutes);
+app.use("/api/concessions", concessionRoutes);
+app.use("/api/refunds", refundRoutes);
+app.use("/api/finance-settings", financeSettingsRoutes);
+app.use("/api/vendors", vendorRoutes);
+app.use("/api/expense-categories", expenseCategoryRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/budgets", budgetRoutes);
+app.use("/api/ledger", ledgerRoutes);
+app.use("/api/cash-closing", cashClosingRoutes);
+app.use("/api/salary-structures", salaryStructureRoutes);
+app.use("/api/payroll", payrollRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/reconciliation", reconciliationRoutes);
+app.use("/api/audit-logs", auditLogRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

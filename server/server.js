@@ -6,6 +6,7 @@ const { initSocket } = require("./src/config/socket");
 const initFeeReminderJob = require("./src/jobs/feeReminder.job");
 const { initCallFallbackJob } = require("./src/jobs/callFallbackCheck.job");
 const { initFeeOverdueCallJob } = require("./src/jobs/feeOverdueCallCheck.job");
+const initFinanceInsightsJob = require("./src/jobs/financeInsights.job");
 
 const PORT = process.env.PORT || 5000;
 
@@ -29,6 +30,7 @@ const startServer = async () => {
   initFeeReminderJob();
   initFeeOverdueCallJob();
   initCallFallbackJob();
+  initFinanceInsightsJob();
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);

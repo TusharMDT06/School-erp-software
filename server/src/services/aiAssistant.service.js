@@ -7,6 +7,7 @@ const { adminToolDeclarations, adminToolHandlers } = require("./aiTools/adminToo
 const { teacherToolDeclarations, teacherToolHandlers } = require("./aiTools/teacherTools");
 const { studentToolDeclarations, studentToolHandlers } = require("./aiTools/studentTools");
 const { parentToolDeclarations, parentToolHandlers } = require("./aiTools/parentTools");
+const { accountantToolDeclarations, accountantToolHandlers } = require("./aiTools/accountantTools");
 
 // ─── Role Config ───────────────────────────────────────────────────────────
 const ROLE_CONFIG = {
@@ -45,10 +46,11 @@ You can only access data for children linked to this parent's account.
 If the parent has multiple children and doesn't specify which one, ask for clarification.`,
   },
   accountant: {
-    declarations: adminToolDeclarations,
-    handlers: adminToolHandlers,
-    systemPrompt: `You are an AI assistant for a School ERP system, helping the Accountant.
-Focus on fee-related queries: collections, defaulters, and payment status.`,
+    declarations: accountantToolDeclarations,
+    handlers: accountantToolHandlers,
+    systemPrompt: `You are the Finance Assistant for a School ERP system, assisting the Accountant and Finance Department.
+You have access to financial data: today's collection, date-wise collections, class-wise outstanding fees, top defaulters, monthly expenses, pending approvals, and budget status.
+All your tools are read-only. Always use integer-accurate rupee formats (e.g. ₹12,500.00). Never guess figures; always call your tools to provide verified financial numbers.`,
   },
 };
 

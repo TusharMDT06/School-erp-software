@@ -54,6 +54,29 @@ import MarksEntry from "../pages/teacher/MarksEntry";
 import MyResults from "../pages/student/MyResults";
 import ChildResults from "../pages/parent/ChildResults";
 
+// ── Phase 7A & 7B: Accountant & Finance Pages ───────────────────────────────
+import AccountantDashboard from "../pages/accountant/AccountantDashboard";
+import FeeCounter from "../pages/accountant/FeeCounter";
+import ConcessionsPage from "../pages/accountant/Concessions";
+import RefundsPage from "../pages/accountant/Refunds";
+import FinanceSettingsPage from "../pages/accountant/FinanceSettings";
+import ExpensesPage from "../pages/accountant/Expenses";
+import VendorsPage from "../pages/accountant/Vendors";
+import BudgetPage from "../pages/accountant/Budget";
+import LedgerPage from "../pages/accountant/Ledger";
+import DayClosePage from "../pages/accountant/DayClose";
+
+// ── Phase 7C: Payroll & Payslips Pages ──────────────────────────────────────
+import PayrollPage from "../pages/accountant/Payroll";
+import SalaryStructures from "../pages/accountant/SalaryStructures";
+import MyPayslips from "../pages/teacher/MyPayslips";
+
+// ── Phase 7D: Reports, Reconciliation & Audit Logs ──────────────────────────
+import ReportsPage from "../pages/accountant/Reports";
+import ReconciliationPage from "../pages/accountant/Reconciliation";
+import AuditLogPage from "../pages/accountant/AuditLog";
+import MyActivityPage from "../pages/accountant/MyActivity";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -85,6 +108,7 @@ const AppRoutes = () => {
           {/* Attendance Reports & Leave Approvals */}
           <Route path="/admin/attendance" element={<AttendanceReports />} />
           <Route path="/admin/leaves" element={<LeaveApprovals />} />
+          <Route path="/admin/approvals" element={<LeaveApprovals />} />
 
           {/* Fees & Finance */}
           <Route path="/admin/fees" element={<FeeStructureSetup />} />
@@ -95,6 +119,10 @@ const AppRoutes = () => {
           <Route path="/admin/exams" element={<ExamSetup />} />
           <Route path="/admin/exams/publish" element={<ResultsPublish />} />
           <Route path="/admin/exams/analytics" element={<PerformanceAnalytics />} />
+
+          {/* Financial Reports & Institutional Audit Logs */}
+          <Route path="/admin/reports" element={<ReportsPage />} />
+          <Route path="/admin/audit-logs" element={<AuditLogPage />} />
 
           {/* Schools & Settings */}
           <Route path="/admin/schools" element={<SchoolManagement />} />
@@ -115,6 +143,7 @@ const AppRoutes = () => {
           {/* Teacher Marks Entry Grid */}
           <Route path="/teacher/marks" element={<MarksEntry />} />
           <Route path="/teacher/results" element={<MarksEntry />} />
+          <Route path="/teacher/payslips" element={<MyPayslips />} />
         </Route>
       </Route>
 
@@ -142,9 +171,23 @@ const AppRoutes = () => {
       {/* ── Accountant Routes ────────────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={["accountant"]} />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/accountant/dashboard" element={<DashboardPlaceholder role="Accountant" />} />
-          <Route path="/accountant/finance" element={<FeeStructureSetup />} />
+          <Route path="/accountant/dashboard" element={<AccountantDashboard />} />
+          <Route path="/accountant/fee-counter" element={<FeeCounter />} />
+          <Route path="/accountant/expenses" element={<ExpensesPage />} />
+          <Route path="/accountant/payroll" element={<PayrollPage />} />
+          <Route path="/accountant/salary-structures" element={<SalaryStructures />} />
+          <Route path="/accountant/vendors" element={<VendorsPage />} />
+          <Route path="/accountant/budget" element={<BudgetPage />} />
+          <Route path="/accountant/ledger" element={<LedgerPage />} />
+          <Route path="/accountant/day-close" element={<DayClosePage />} />
+          <Route path="/accountant/concessions" element={<ConcessionsPage />} />
+          <Route path="/accountant/refunds" element={<RefundsPage />} />
           <Route path="/accountant/fees/defaulters" element={<DefaulterList />} />
+          <Route path="/accountant/finance" element={<FeeStructureSetup />} />
+          <Route path="/accountant/reports" element={<ReportsPage />} />
+          <Route path="/accountant/reconciliation" element={<ReconciliationPage />} />
+          <Route path="/accountant/my-activity" element={<MyActivityPage />} />
+          <Route path="/accountant/settings" element={<FinanceSettingsPage />} />
         </Route>
       </Route>
 

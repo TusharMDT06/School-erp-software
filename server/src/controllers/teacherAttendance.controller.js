@@ -225,7 +225,7 @@ exports.getTeacherAttendanceSummary = async (req, res, next) => {
           as: "teacher",
         },
       },
-      { $unwind: { path: "$teacher", preserveNullAndEmpty: true } },
+      { $unwind: { path: "$teacher", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "users",
@@ -234,7 +234,7 @@ exports.getTeacherAttendanceSummary = async (req, res, next) => {
           as: "user",
         },
       },
-      { $unwind: { path: "$user", preserveNullAndEmpty: true } },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       {
         $project: {
           _id: 1,

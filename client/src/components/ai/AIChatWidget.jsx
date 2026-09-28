@@ -57,7 +57,7 @@ const ROLE_GREETINGS = {
   teacher: "Hi! I'm your teaching assistant. Ask me about your classes, students' attendance, or exam results.",
   student: "Hi! I'm your personal school assistant. Ask me about your attendance, results, or fee status.",
   parent: "Hi! I'm here to help you stay updated on your child's academics, attendance, and fees.",
-  accountant: "Hi! I'm your finance assistant. Ask me about fee collections, defaulters, or payment status.",
+  accountant: "Hi! I'm your Finance Assistant. Ask me about today's collection, defaulters, monthly expenses, or budget status.",
 };
 
 const ROLE_COLORS = {
@@ -110,10 +110,10 @@ const SUGGESTED_PROMPTS = {
     "Show my children",
   ],
   accountant: [
-    "Fee collection summary",
-    "Show defaulters list",
-    "Pending fee count",
-    "School overview",
+    "Today's collection",
+    "Top 5 defaulters",
+    "This month's expenses",
+    "Which budget is nearly exhausted?",
   ],
 };
 
@@ -243,8 +243,12 @@ const AIChatWidget = () => {
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-semibold text-sm leading-none">AI Assistant</p>
-              <p className="text-white/70 text-xs mt-0.5 capitalize">{role} Portal</p>
+              <p className="text-white font-semibold text-sm leading-none">
+                {role === "accountant" ? "Finance Assistant" : "AI Assistant"}
+              </p>
+              <p className="text-white/70 text-xs mt-0.5 capitalize">
+                {role === "accountant" ? "Finance & Accounting AI" : `${role} Portal`}
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <button

@@ -29,6 +29,14 @@ import {
   CalendarCheck,
   Wallet,
   UserCog,
+  RotateCcw,
+  CreditCard,
+  Building2,
+  PieChart,
+  Lock,
+  History,
+  ArrowRightLeft,
+  FileText,
 } from "lucide-react";
 
 // ── Nav config per role ────────────────────────────────────────────────────
@@ -47,6 +55,8 @@ const NAV_ITEMS = {
     { icon: Award,           label: "Exams Setup",          path: "/admin/exams" },
     { icon: Send,            label: "Publish Results",      path: "/admin/exams/publish" },
     { icon: BarChart3,       label: "Exam Analytics",       path: "/admin/exams/analytics" },
+    { icon: FileText,        label: "Financial Reports",    path: "/admin/reports" },
+    { icon: History,         label: "Audit Logs",           path: "/admin/audit-logs" },
     { icon: Settings,        label: "Settings",             path: "/admin/settings" },
   ],
   superadmin: [
@@ -63,6 +73,8 @@ const NAV_ITEMS = {
     { icon: Award,           label: "Exams Setup",          path: "/admin/exams" },
     { icon: Send,            label: "Publish Results",      path: "/admin/exams/publish" },
     { icon: BarChart3,       label: "Exam Analytics",       path: "/admin/exams/analytics" },
+    { icon: FileText,        label: "Financial Reports",    path: "/admin/reports" },
+    { icon: History,         label: "Audit Logs",           path: "/admin/audit-logs" },
     { icon: Users,           label: "Schools",              path: "/admin/schools" },
     { icon: Settings,        label: "Settings",             path: "/admin/settings" },
   ],
@@ -72,6 +84,7 @@ const NAV_ITEMS = {
     { icon: ClipboardList,   label: "Attendance",      path: "/teacher/attendance" },
     { icon: Award,           label: "Marks Entry",     path: "/teacher/marks" },
     { icon: BookOpen,        label: "Classes",         path: "/teacher/classes" },
+    { icon: Receipt,         label: "My Payslips",     path: "/teacher/payslips" },
   ],
   student: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/student/dashboard" },
@@ -86,9 +99,22 @@ const NAV_ITEMS = {
     { icon: DollarSign,      label: "Pay Fees",        path: "/parent/fees" },
   ],
   accountant: [
-    { icon: LayoutDashboard, label: "Dashboard",       path: "/accountant/dashboard" },
-    { icon: DollarSign,      label: "Fee Structures",  path: "/accountant/finance" },
-    { icon: AlertTriangle,   label: "Defaulters",      path: "/accountant/fees/defaulters" },
+    { icon: LayoutDashboard, label: "Dashboard",        path: "/accountant/dashboard" },
+    { icon: DollarSign,      label: "Collect Fee",      path: "/accountant/fee-counter" },
+    { icon: DollarSign,      label: "Fee Structures",   path: "/accountant/finance" },
+    { icon: Receipt,         label: "Concessions",      path: "/accountant/concessions" },
+    { icon: AlertTriangle,   label: "Defaulters",       path: "/accountant/fees/defaulters" },
+    { icon: RotateCcw,       label: "Refunds",          path: "/accountant/refunds" },
+    { icon: CreditCard,      label: "Expenses",         path: "/accountant/expenses" },
+    { icon: Building2,       label: "Vendors",          path: "/accountant/vendors" },
+    { icon: PieChart,        label: "Budget",           path: "/accountant/budget" },
+    { icon: Wallet,          label: "Payroll",          path: "/accountant/payroll" },
+    { icon: BookOpen,        label: "Ledger",           path: "/accountant/ledger" },
+    { icon: Lock,            label: "Day Close",        path: "/accountant/day-close" },
+    { icon: FileText,        label: "Reports",          path: "/accountant/reports" },
+    { icon: ArrowRightLeft,  label: "Reconciliation",   path: "/accountant/reconciliation" },
+    { icon: History,         label: "My Activity",      path: "/accountant/my-activity" },
+    { icon: Settings,        label: "Finance Settings", path: "/accountant/settings" },
   ],
 };
 

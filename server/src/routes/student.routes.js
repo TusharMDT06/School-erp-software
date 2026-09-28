@@ -48,14 +48,14 @@ router.use(authMiddleware);
 router
   .route("/")
   .post(authorizeRoles("admin", "superadmin"), createStudent)
-  .get(authorizeRoles("admin", "superadmin", "teacher", "student", "parent"), listStudents);
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent"), listStudents);
 
 // ─── Student self-profile (student role only, must be BEFORE /:id) ─────────
 router.get("/me", authorizeRoles("student"), getMyStudentProfile);
 
 router
   .route("/:id")
-  .get(authorizeRoles("admin", "superadmin", "teacher", "student", "parent"), getStudent)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent"), getStudent)
   .put(authorizeRoles("admin", "superadmin"), updateStudent)
   .delete(authorizeRoles("admin", "superadmin"), deleteStudent);
 

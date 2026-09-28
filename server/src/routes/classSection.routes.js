@@ -17,11 +17,11 @@ router.use(authMiddleware);
 router
   .route("/")
   .post(authorizeRoles("admin", "superadmin"), createClass)
-  .get(authorizeRoles("admin", "superadmin", "teacher"), listClasses);
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "principal"), listClasses);
 
 router
   .route("/:id")
-  .get(authorizeRoles("admin", "superadmin", "teacher"), getClass)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "principal"), getClass)
   .put(authorizeRoles("admin", "superadmin"), updateClass)
   .delete(authorizeRoles("admin", "superadmin"), deleteClass);
 

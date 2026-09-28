@@ -2,16 +2,17 @@ const mongoose = require("mongoose");
 
 const feeHeadSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Fee head name is required"],
-      trim: true,
-    },
-    amount: {
-      type: Number,
-      required: [true, "Fee head amount is required"],
-      min: [0, "Amount cannot be negative"],
-    },
+    name:   { type: String, required: [true, "Fee head name is required"], trim: true },
+    amount: { type: Number, required: [true, "Fee head amount is required"], min: 0 }, // rupees
+  },
+  { _id: false }
+);
+
+const installmentSchema = new mongoose.Schema(
+  {
+    name:    { type: String, required: true, trim: true },
+    amount:  { type: Number, required: true, min: 0 }, // rupees
+    dueDate: { type: Date, required: true },
   },
   { _id: false }
 );
@@ -48,19 +49,16 @@ const feeStructureSchema = new mongoose.Schema(
         message: "At least one fee head is required",
       },
     },
-    totalAmount: {
-      type: Number,
-      default: 0,
-    },
-    dueDate: {
-      type: Date,
-      required: [true, "Due date is required"],
-    },
+    totalAmount: { type: Number, default: 0 }, // rupees (auto-calculated)
+    dueDate:     { type: Date, required: [true, "Due date is required"] },
+
+    // Optional installments — if provided, one FeeTransaction is created per installment per student
+    installments: { type: [installmentSchema], default: [] },
   },
   { timestamps: true }
 );
 
-// Pre-save hook: auto-calculate totalAmount from feeHeads
+// Pre-save: auto-calculate totalAmount from feeHeads
 feeStructureSchema.pre("save", function (next) {
   if (Array.isArray(this.feeHeads)) {
     this.totalAmount = this.feeHeads.reduce((sum, head) => sum + (head.amount || 0), 0);
