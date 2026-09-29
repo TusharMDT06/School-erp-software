@@ -13,6 +13,7 @@ const { startMonthlyReportCron } = require("./src/jobs/monthlyReportGen.job");
 const { startMorningBriefCron } = require("./src/jobs/morningBrief.job");
 const { startHomeworkDueReminderCron } = require("./src/jobs/homeworkDueReminderCron.job");
 const { startHomeworkDigestCron } = require("./src/jobs/homeworkDigestCron.job");
+const { startQuizAutoSubmitCron } = require("./src/jobs/quizAutoSubmitCron.job");
 
 const PORT = process.env.PORT || 5000;
 
@@ -49,6 +50,7 @@ const startServer = async () => {
   startMorningBriefCron();
   startHomeworkDueReminderCron();
   startHomeworkDigestCron();
+  startQuizAutoSubmitCron();
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);

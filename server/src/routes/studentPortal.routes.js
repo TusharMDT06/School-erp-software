@@ -9,6 +9,16 @@ const {
 const {
   getStudentMaterials,
 } = require("../controllers/studyMaterial.controller");
+const {
+  getStudentGradebook,
+} = require("../controllers/gradebook.controller");
+const {
+  getStudentQuizzes,
+  startQuiz,
+  autosaveQuiz,
+  submitQuiz,
+  getQuizResult,
+} = require("../controllers/quizStudent.controller");
 
 const router = express.Router();
 
@@ -25,5 +35,15 @@ router.post(
 
 // ── Student Study Materials Endpoints ──────────────────────────────────────
 router.get("/materials", authorizeRoles("student"), getStudentMaterials);
+
+// ── Student Gradebook Endpoint ─────────────────────────────────────────────
+router.get("/gradebook", authorizeRoles("student"), getStudentGradebook);
+
+// ── Student Online Quizzes Endpoints ───────────────────────────────────────
+router.get("/quizzes", authorizeRoles("student"), getStudentQuizzes);
+router.post("/quizzes/:id/start", authorizeRoles("student"), startQuiz);
+router.put("/quizzes/:id/autosave", authorizeRoles("student"), autosaveQuiz);
+router.post("/quizzes/:id/submit", authorizeRoles("student"), submitQuiz);
+router.get("/quizzes/:id/result", authorizeRoles("student"), getQuizResult);
 
 module.exports = router;

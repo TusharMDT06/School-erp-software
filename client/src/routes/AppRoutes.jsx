@@ -48,6 +48,16 @@ import StudentHomework from "../pages/student/Homework";
 import StudentStudyMaterials from "../pages/student/StudyMaterials";
 import ChildHomework from "../pages/parent/ChildHomework";
 
+// ── Phase 9B: Syllabus, Gradebook & Quizzes ─────────────────────────────────
+import Syllabus from "../pages/teacher/Syllabus";
+import Gradebook from "../pages/teacher/Gradebook";
+import QuizBuilder from "../pages/teacher/QuizBuilder";
+import QuizResults from "../pages/teacher/QuizResults";
+import StudentQuizzes from "../pages/student/Quizzes";
+import TakeQuiz from "../pages/student/TakeQuiz";
+import QuizResultView from "../pages/student/QuizResultView";
+import StudentGradebook from "../pages/student/StudentGradebook";
+
 // ── Phase 4: Fee & Finance Pages ──────────────────────────────────────────────
 import FeeStructureSetup from "../pages/admin/Fees/FeeStructureSetup";
 import DefaulterList from "../pages/admin/Fees/DefaulterList";
@@ -214,6 +224,11 @@ const AppRoutes = () => {
           {/* Homework & Study Materials */}
           <Route path="/teacher/homework" element={<TeacherHomework />} />
           <Route path="/teacher/materials" element={<TeacherStudyMaterials />} />
+          {/* Phase 9B: Syllabus, Gradebook & Quizzes */}
+          <Route path="/teacher/syllabus" element={<Syllabus />} />
+          <Route path="/teacher/gradebook" element={<Gradebook />} />
+          <Route path="/teacher/quizzes" element={<QuizBuilder />} />
+          <Route path="/teacher/quizzes/:id/results" element={<QuizResults />} />
           {/* Scoped student list */}
           <Route path="/teacher/students" element={<StudentList />} />
           {/* Classes */}
@@ -238,6 +253,11 @@ const AppRoutes = () => {
           <Route path="/student/attendance" element={<MyAttendance />} />
           <Route path="/student/homework" element={<StudentHomework />} />
           <Route path="/student/materials" element={<StudentStudyMaterials />} />
+          {/* Phase 9B: Quizzes & Gradebook */}
+          <Route path="/student/quizzes" element={<StudentQuizzes />} />
+          <Route path="/student/quizzes/:id/take" element={<TakeQuiz />} />
+          <Route path="/student/quizzes/:id/result" element={<QuizResultView />} />
+          <Route path="/student/gradebook" element={<StudentGradebook />} />
           <Route path="/student/fees" element={<FeeStatus />} />
           <Route path="/student/results" element={<MyResults />} />
         </Route>

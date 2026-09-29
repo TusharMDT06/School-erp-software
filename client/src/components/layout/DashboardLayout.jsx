@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../features/auth/authSlice";
@@ -42,9 +42,10 @@ import {
   HeartHandshake,
   ShieldAlert,
   Layers,
+  HelpCircle,
 } from "lucide-react";
 
-// â”€â”€ Nav config per role â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Nav config per role ──────────────────────────────────────────────────────
 const NAV_ITEMS = {
   principal: [
     { icon: LayoutDashboard, label: "Dashboard",            path: "/principal/dashboard" },
@@ -112,25 +113,30 @@ const NAV_ITEMS = {
     { icon: Settings,        label: "Settings",             path: "/admin/settings" },
   ],
   teacher: [
-    { icon: LayoutDashboard, label: "Dashboard",       path: "/teacher/dashboard" },
-    { icon: ClipboardList,   label: "Attendance",      path: "/teacher/attendance" },
-    { icon: BookOpen,        label: "Homework",        path: "/teacher/homework" },
-    { icon: Layers,          label: "Study Materials", path: "/teacher/materials" },
-    { icon: Award,           label: "Marks Entry",     path: "/teacher/marks" },
-    { icon: Calendar,        label: "Timetable",       path: "/calendar" },
-    { icon: Send,            label: "Messages",        path: "/circulars" },
-    { icon: CalendarCheck,   label: "Leave",           path: "/teacher/dashboard" },
-    { icon: Receipt,         label: "My Payslips",     path: "/teacher/payslips" },
-    { icon: GraduationCap,   label: "My Students",     path: "/teacher/students" },
-    { icon: BarChart3,       label: "Academics",       path: "/teacher/academics" },
-    { icon: HeartHandshake,  label: "Student Welfare", path: "/teacher/welfare" },
-    { icon: ShieldAlert,     label: "Incidents",       path: "/teacher/incidents" },
+    { icon: LayoutDashboard, label: "Dashboard",        path: "/teacher/dashboard" },
+    { icon: ClipboardList,   label: "Attendance",       path: "/teacher/attendance" },
+    { icon: BookOpen,        label: "Homework",         path: "/teacher/homework" },
+    { icon: Layers,          label: "Study Materials",  path: "/teacher/materials" },
+    { icon: BookOpen,        label: "Syllabus & Plans", path: "/teacher/syllabus" },
+    { icon: Award,           label: "Gradebook",        path: "/teacher/gradebook" },
+    { icon: HelpCircle,      label: "Online Quizzes",   path: "/teacher/quizzes" },
+    { icon: Award,           label: "Marks Entry",      path: "/teacher/marks" },
+    { icon: Calendar,        label: "Timetable",        path: "/calendar" },
+    { icon: Send,            label: "Messages",         path: "/circulars" },
+    { icon: CalendarCheck,   label: "Leave",            path: "/teacher/dashboard" },
+    { icon: Receipt,         label: "My Payslips",      path: "/teacher/payslips" },
+    { icon: GraduationCap,   label: "My Students",      path: "/teacher/students" },
+    { icon: BarChart3,       label: "Academics",        path: "/teacher/academics" },
+    { icon: HeartHandshake,  label: "Student Welfare",  path: "/teacher/welfare" },
+    { icon: ShieldAlert,     label: "Incidents",        path: "/teacher/incidents" },
   ],
   student: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/student/dashboard" },
     { icon: ClipboardList,   label: "My Attendance",   path: "/student/attendance" },
     { icon: BookOpen,        label: "Homework",        path: "/student/homework" },
     { icon: Layers,          label: "Study Materials", path: "/student/materials" },
+    { icon: HelpCircle,      label: "Online Quizzes",  path: "/student/quizzes" },
+    { icon: Award,           label: "My Gradebook",    path: "/student/gradebook" },
     { icon: Award,           label: "My Results",      path: "/student/results" },
     { icon: Receipt,         label: "Fee Status",      path: "/student/fees" },
     { icon: Calendar,        label: "Calendar",        path: "/calendar" },

@@ -50,6 +50,10 @@ const homeworkRoutes = require("./routes/homework.routes");
 const studyMaterialRoutes = require("./routes/studyMaterial.routes");
 const studentPortalRoutes = require("./routes/studentPortal.routes");
 const parentPortalRoutes = require("./routes/parentPortal.routes");
+const syllabusRoutes = require("./routes/syllabus.routes");
+const lessonPlanRoutes = require("./routes/lessonPlan.routes");
+const gradebookRoutes = require("./routes/gradebook.routes");
+const quizRoutes = require("./routes/quiz.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -175,6 +179,10 @@ app.use("/api/homework", homeworkRoutes);
 app.use("/api/study-materials", studyMaterialRoutes);
 app.use("/api/student", studentPortalRoutes);
 app.use("/api/parent", parentPortalRoutes);
+app.use("/api/syllabus", syllabusRoutes);
+app.use("/api/lesson-plans", lessonPlanRoutes);
+app.use("/api/gradebook", gradebookRoutes);
+app.use("/api/quizzes", quizRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
