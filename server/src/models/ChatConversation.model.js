@@ -27,7 +27,7 @@ const chatConversationSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["superadmin", "admin", "teacher", "student", "parent", "accountant"],
+      enum: ["superadmin", "admin", "principal", "teacher", "student", "parent", "accountant"],
       required: true,
     },
     schoolId: {
