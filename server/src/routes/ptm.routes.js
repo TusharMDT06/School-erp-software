@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const ptmCtrl = require("../controllers/ptm.controller");
-const { verifyToken, authorizeRoles } = require("../middlewares/auth.middleware");
+const authMiddleware = require("../middlewares/auth.middleware");
+const { authorizeRoles } = require("../middlewares/role.middleware");
 
 // Protect all PTM routes
-router.use(verifyToken);
+router.use(authMiddleware);
 
 // Create PTM Event (Principal, Admin, Superadmin)
 router.post(

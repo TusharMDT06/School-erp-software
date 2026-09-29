@@ -3,10 +3,11 @@ const router = express.Router();
 const subCtrl = require("../controllers/teacherSubstitution.controller");
 const classTeacherCtrl = require("../controllers/classTeacher.controller");
 const ptmCtrl = require("../controllers/ptm.controller");
-const { verifyToken, authorizeRoles } = require("../middlewares/auth.middleware");
+const authMiddleware = require("../middlewares/auth.middleware");
+const { authorizeRoles } = require("../middlewares/role.middleware");
 
 // Protect all routes
-router.use(verifyToken);
+router.use(authMiddleware);
 
 // ============================================
 // Substitutions (Teacher view)

@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const remarkCtrl = require("../controllers/studentRemark.controller");
-const { verifyToken, authorizeRoles } = require("../middlewares/auth.middleware");
+const authMiddleware = require("../middlewares/auth.middleware");
+const { authorizeRoles } = require("../middlewares/role.middleware");
 
 // Protect all remark routes
-router.use(verifyToken);
+router.use(authMiddleware);
 
 // Create remark (Teacher, Admin, Principal)
 router.post(
