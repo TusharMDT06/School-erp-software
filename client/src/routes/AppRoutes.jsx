@@ -77,16 +77,51 @@ import ReconciliationPage from "../pages/accountant/Reconciliation";
 import AuditLogPage from "../pages/accountant/AuditLog";
 import MyActivityPage from "../pages/accountant/MyActivity";
 
+// ── Phase 8A: Principal & Approvals & Calendar & Circulars ───────────────────
+import PrincipalDashboard from "../pages/principal/PrincipalDashboard";
+import ApprovalCenter from "../pages/principal/ApprovalCenter";
+import CalendarPage from "../pages/principal/CalendarPage";
+import Circulars from "../pages/principal/Circulars";
+import CircularInbox from "../pages/shared/CircularInbox";
+
+// ── Phase 8B: Academics, Welfare, Staff & Incidents ─────────────────────────
+import Academics from "../pages/principal/Academics";
+import StudentWelfare from "../pages/principal/StudentWelfare";
+import StaffOverview from "../pages/principal/StaffOverview";
+import Incidents from "../pages/principal/Incidents";
+
+// ── Phase 8C: Admissions CRM & Monthly MIS Reports ──────────────────────────
+import Admissions from "../pages/principal/Admissions";
+import Reports from "../pages/principal/Reports";
+import PublicEnquiryForm from "../pages/public/PublicEnquiryForm";
+
 const AppRoutes = () => {
   return (
     <Routes>
       {/* ── Public Routes ────────────────────────────────────────────── */}
       <Route path="/login" element={<Login />} />
+      <Route path="/enquire" element={<PublicEnquiryForm />} />
       <Route path="/student-signup" element={<StudentSignupVerify />} />
       <Route path="/student-signup/complete" element={<StudentSignupComplete />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* ── Principal Routes ─────────────────────────────────────────── */}
+      <Route element={<ProtectedRoute allowedRoles={["principal", "admin", "superadmin"]} />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
+          <Route path="/principal/approvals" element={<ApprovalCenter />} />
+          <Route path="/principal/calendar" element={<CalendarPage />} />
+          <Route path="/principal/circulars" element={<Circulars />} />
+          <Route path="/principal/academics" element={<Academics />} />
+          <Route path="/principal/welfare" element={<StudentWelfare />} />
+          <Route path="/principal/staff" element={<StaffOverview />} />
+          <Route path="/principal/incidents" element={<Incidents />} />
+          <Route path="/principal/admissions" element={<Admissions />} />
+          <Route path="/principal/reports" element={<Reports />} />
+        </Route>
+      </Route>
 
       {/* ── Admin / Superadmin Routes ────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={["admin", "superadmin"]} />}>
@@ -105,10 +140,12 @@ const AppRoutes = () => {
           <Route path="/admin/students" element={<StudentList />} />
           <Route path="/admin/students/:id" element={<StudentProfile />} />
 
-          {/* Attendance Reports & Leave Approvals */}
+          {/* Attendance Reports & Approvals (Unified Approval Center) */}
           <Route path="/admin/attendance" element={<AttendanceReports />} />
-          <Route path="/admin/leaves" element={<LeaveApprovals />} />
-          <Route path="/admin/approvals" element={<LeaveApprovals />} />
+          <Route path="/admin/leaves" element={<ApprovalCenter />} />
+          <Route path="/admin/approvals" element={<ApprovalCenter />} />
+          <Route path="/admin/calendar" element={<CalendarPage />} />
+          <Route path="/admin/circulars" element={<Circulars />} />
 
           {/* Fees & Finance */}
           <Route path="/admin/fees" element={<FeeStructureSetup />} />
@@ -124,9 +161,41 @@ const AppRoutes = () => {
           <Route path="/admin/reports" element={<ReportsPage />} />
           <Route path="/admin/audit-logs" element={<AuditLogPage />} />
 
+          {/* Phase 8B: Academics, Welfare, Staff & Incidents */}
+          <Route path="/admin/academics" element={<Academics />} />
+          <Route path="/admin/welfare" element={<StudentWelfare />} />
+          <Route path="/admin/staff" element={<StaffOverview />} />
+          <Route path="/admin/incidents" element={<Incidents />} />
+
+          {/* Phase 8C: Admissions CRM & Monthly MIS Reports */}
+          <Route path="/admin/admissions" element={<Admissions />} />
+          <Route path="/admin/mis-reports" element={<Reports />} />
+
           {/* Schools & Settings */}
           <Route path="/admin/schools" element={<SchoolManagement />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
+        </Route>
+      </Route>
+
+      {/* ── Shared Routes: Calendar & Circulars for all authenticated roles */}
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "admin",
+              "superadmin",
+              "principal",
+              "teacher",
+              "student",
+              "parent",
+              "accountant",
+            ]}
+          />
+        }
+      >
+        <Route element={<DashboardLayout />}>
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/circulars" element={<CircularInbox />} />
         </Route>
       </Route>
 
@@ -144,6 +213,10 @@ const AppRoutes = () => {
           <Route path="/teacher/marks" element={<MarksEntry />} />
           <Route path="/teacher/results" element={<MarksEntry />} />
           <Route path="/teacher/payslips" element={<MyPayslips />} />
+          {/* Phase 8B: Academics, Welfare, Incidents */}
+          <Route path="/teacher/academics" element={<Academics />} />
+          <Route path="/teacher/welfare" element={<StudentWelfare />} />
+          <Route path="/teacher/incidents" element={<Incidents />} />
         </Route>
       </Route>
 

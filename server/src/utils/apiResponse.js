@@ -15,6 +15,29 @@ class ApiResponse {
     this.message = message;
     this.success = statusCode < 400;
   }
+
+  /**
+   * Static helper method for success responses.
+   * Flexibly handles:
+   *   ApiResponse.success(statusCode, message, data)
+   *   ApiResponse.success(statusCode, data, message)
+   *   ApiResponse.success(message, data)
+   *   ApiResponse.success(data, message)
+   */
+  static success(arg1, arg2, arg3) {
+    if (typeof arg1 === "number") {
+      if (typeof arg2 === "string") {
+        return new ApiResponse(arg1, arg3 !== undefined ? arg3 : null, arg2);
+      }
+      return new ApiResponse(arg1, arg2, typeof arg3 === "string" ? arg3 : "Success");
+    }
+
+    if (typeof arg1 === "string") {
+      return new ApiResponse(200, arg2 !== undefined ? arg2 : null, arg1);
+    }
+
+    return new ApiResponse(200, arg1, typeof arg2 === "string" ? arg2 : "Success");
+  }
 }
 
 class ApiError extends Error {

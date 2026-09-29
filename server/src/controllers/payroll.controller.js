@@ -20,6 +20,7 @@ const {
   calculateApprovedLeaveDaysInMonth,
   calculateStaffPayroll,
 } = require("../utils/payrollCalculator");
+const { calculateSchoolWorkingDaysInMonth } = require("../utils/workingDay");
 const { generatePayslipPdf } = require("../utils/generatePayslipPdf");
 
 /**
@@ -77,8 +78,8 @@ const createPayrollRun = async (req, res, next) => {
     const settings = (await FinanceSettings.findOne({ schoolId }).lean()) || {};
     const paidLeavesPerMonth = settings.paidLeavesPerMonth ?? 1;
 
-    // 3. Working days for the month (Sundays excluded)
-    const workingDays = calculateWorkingDaysInMonth(numMonth, numYear);
+    // 3. Working days for the month (Sundays & declared holidays excluded via isWorkingDay)
+    const workingDays = await calculateSchoolWorkingDaysInMonth(schoolId, numMonth, numYear);
 
     // 4. Overlapping approved leaves
     const staffUserIds = structures.map((s) => s.staffUserId?._id).filter(Boolean);

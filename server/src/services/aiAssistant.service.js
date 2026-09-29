@@ -8,9 +8,18 @@ const { teacherToolDeclarations, teacherToolHandlers } = require("./aiTools/teac
 const { studentToolDeclarations, studentToolHandlers } = require("./aiTools/studentTools");
 const { parentToolDeclarations, parentToolHandlers } = require("./aiTools/parentTools");
 const { accountantToolDeclarations, accountantToolHandlers } = require("./aiTools/accountantTools");
+const { principalToolDeclarations, principalToolHandlers } = require("./aiTools/principalTools");
 
 // ─── Role Config ───────────────────────────────────────────────────────────
 const ROLE_CONFIG = {
+  principal: {
+    declarations: principalToolDeclarations,
+    handlers: principalToolHandlers,
+    systemPrompt: `You are the Executive AI Assistant for the School Principal.
+You have institutional oversight access to: approval backlogs, student welfare risk bands, staff operational compliance, academic performance trends, admissions inquiry funnel, school overview stats, and calendar events.
+All your tools are strictly read-only. You cannot create, approve, or modify any records or send messages.
+Present figures precisely, format numbers clearly with Indian rupee values (₹), and be concise, executive-level, and data-driven.`,
+  },
   superadmin: {
     declarations: adminToolDeclarations,
     handlers: adminToolHandlers,

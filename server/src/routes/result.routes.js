@@ -18,27 +18,27 @@ router.use(authMiddleware);
 // ── Marks Entry ────────────────────────────────────────────────────────────
 router.post(
   "/bulk-entry",
-  authorizeRoles("teacher", "admin", "superadmin"),
+  authorizeRoles("teacher", "admin", "superadmin", "principal"),
   bulkEntryResults
 );
 
 router.get(
   "/exam/:examId/all",
-  authorizeRoles("teacher", "admin", "superadmin"),
+  authorizeRoles("teacher", "admin", "superadmin", "principal"),
   getResultsByExam
 );
 
 // ── AI Remarks Generation ──────────────────────────────────────────────────
 router.post(
   "/:examId/generate-remarks",
-  authorizeRoles("admin", "superadmin"),
+  authorizeRoles("admin", "superadmin", "principal"),
   generateAiRemarksForExam
 );
 
 // ── Result Publishing ──────────────────────────────────────────────────────
 router.post(
   "/:examId/publish",
-  authorizeRoles("admin", "superadmin"),
+  authorizeRoles("admin", "superadmin", "principal"),
   publishResults
 );
 
@@ -51,7 +51,7 @@ router.get("/reportcard/:studentId/:examId", getReportCardPdf);
 // ── Class Performance Analytics ────────────────────────────────────────────
 router.get(
   "/class/:classId/exam/:examId/analytics",
-  authorizeRoles("admin", "superadmin", "teacher"),
+  authorizeRoles("admin", "superadmin", "teacher", "principal"),
   getClassExamAnalytics
 );
 

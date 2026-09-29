@@ -52,6 +52,7 @@ const MessageContent = ({ content }) => (
 
 // Role-specific greeting messages
 const ROLE_GREETINGS = {
+  principal: "Hi Principal! I'm your Executive AI Assistant. Ask me about pending approvals, at-risk students, staff compliance, or admission funnels.",
   admin: "Hi! I'm your School ERP Assistant. Ask me about students, teachers, attendance, fees, or exam results.",
   superadmin: "Hi! I'm your School ERP Assistant. I have full access to school-wide data. What would you like to know?",
   teacher: "Hi! I'm your teaching assistant. Ask me about your classes, students' attendance, or exam results.",
@@ -61,6 +62,7 @@ const ROLE_GREETINGS = {
 };
 
 const ROLE_COLORS = {
+  principal: "from-indigo-600 to-indigo-900",
   admin: "from-[#1F4E79] to-[#2563a8]",
   superadmin: "from-purple-600 to-purple-800",
   teacher: "from-emerald-600 to-emerald-800",
@@ -70,6 +72,7 @@ const ROLE_COLORS = {
 };
 
 const ROLE_ACCENT = {
+  principal: "bg-indigo-600",
   admin: "bg-[#1F4E79]",
   superadmin: "bg-purple-600",
   teacher: "bg-emerald-600",
@@ -79,6 +82,12 @@ const ROLE_ACCENT = {
 };
 
 const SUGGESTED_PROMPTS = {
+  principal: [
+    "Who needs my approval?",
+    "At-risk students this week",
+    "Admission funnel this month",
+    "Which class has low attendance?",
+  ],
   admin: [
     "Give me a school overview",
     "Show fee defaulters",

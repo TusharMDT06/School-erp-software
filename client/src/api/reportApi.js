@@ -95,3 +95,21 @@ export const exportCollectionEfficiencyReportApi = async (params = {}) =>
       responseType: "blob",
     })
   ).data;
+
+// ==========================================
+// Phase 8C: Monthly Principal's MIS Report
+// ==========================================
+export const getMonthlySnapshotApi = (params) =>
+  axiosInstance.get("/principal/reports/monthly", { params });
+
+export const generateMonthlyReportApi = (data) =>
+  axiosInstance.post("/principal/reports/monthly/generate", data);
+
+export const listReportsApi = () =>
+  axiosInstance.get("/principal/reports");
+
+export const downloadReportApi = (id, format = "pdf") =>
+  axiosInstance.get(`/principal/reports/${id}/download`, {
+    params: { format },
+    responseType: "blob",
+  });

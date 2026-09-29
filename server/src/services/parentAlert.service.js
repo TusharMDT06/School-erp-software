@@ -1,5 +1,6 @@
 const CallLog = require("../models/CallLog.model");
 const voiceCallService = require("./voiceCall.service");
+const { isQuietTime } = require("../utils/commsGuard");
 
 /**
  * Formats a date for human-friendly speech/text.
@@ -88,6 +89,13 @@ async function sendParentAlert({
       message = `नमस्ते। यह स्कूल ईआरपी से स्वचालित कॉल है। आपके बच्चे ${studentName} की फीस ${amountDue} रुपये ${dueDate} से बकाया है। कृपया जल्द से जल्द भुगतान करें। धन्यवाद।`;
     } else {
       console.warn(`[ParentAlert] Unknown reason: ${reason}`);
+      return null;
+    }
+
+    console.log(`📣 [ParentAlert] Checking quiet time before alerting ${parentPhone} for student ${studentName}...`);
+    const quiet = await isQuietTime(contextData?.schoolId || null, new Date(), "phone");
+    if (quiet.isQuiet) {
+      console.log(`⏸️ [ParentAlert] Postponing voice/SMS alert to ${parentPhone}: ${quiet.reason}. Next window: ${quiet.nextAllowedTime}`);
       return null;
     }
 

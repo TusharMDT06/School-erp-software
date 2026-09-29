@@ -14,10 +14,10 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // ── Exam Configuration ─────────────────────────────────────────────────────
-router.post("/", authorizeRoles("admin", "superadmin"), createExam);
+router.post("/", authorizeRoles("admin", "superadmin", "principal"), createExam);
 router.get("/class/:classId", getExamsByClass);
 router.get("/:id", getExamById);
-router.put("/:id", authorizeRoles("admin", "superadmin"), updateExam);
-router.delete("/:id", authorizeRoles("admin", "superadmin"), deleteExam);
+router.put("/:id", authorizeRoles("admin", "superadmin", "principal"), updateExam);
+router.delete("/:id", authorizeRoles("admin", "superadmin", "principal"), deleteExam);
 
 module.exports = router;

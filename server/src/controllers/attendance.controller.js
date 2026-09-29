@@ -4,6 +4,8 @@ const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
 const ClassSection = require("../models/ClassSection.model");
 const notifyAbsentee = require("../utils/notifyAbsentee");
+const { isWorkingDay } = require("../utils/workingDay");
+const auditLog = require("../utils/auditLog");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
 
 /**
@@ -43,6 +45,33 @@ const markAttendance = async (req, res, next) => {
     const classSection = await ClassSection.findById(classId);
     if (!classSection) {
       throw new ApiError(404, "Class section not found.");
+    }
+
+    // ── Working Day / Holiday Check ──────────────────────────────────────────
+    const schoolId = classSection.schoolId;
+    const workingDayCheck = await isWorkingDay(schoolId, normalizedDate);
+    if (!workingDayCheck.isWorkingDay) {
+      const isPrivileged = ["admin", "superadmin", "principal"].includes(req.user.role);
+      const { forceMark, reason } = req.body;
+
+      if (!isPrivileged || !forceMark) {
+        throw new ApiError(409, `Holiday: ${workingDayCheck.reason}`);
+      }
+
+      // Privileged override: audit log this action
+      await auditLog({
+        schoolId,
+        userId: req.user.id || req.user._id,
+        action: "ATTENDANCE_FORCE_MARKED_HOLIDAY",
+        module: "attendance",
+        targetId: classId,
+        details: {
+          classId,
+          date: normalizedDate,
+          holidayReason: workingDayCheck.reason,
+          forceReason: reason || "Administrative override on non-working day",
+        },
+      });
     }
 
     // Determine markedBy (Teacher ObjectId)

@@ -47,21 +47,21 @@ router.use(authMiddleware);
 
 router
   .route("/")
-  .post(authorizeRoles("admin", "superadmin"), createStudent)
-  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent"), listStudents);
+  .post(authorizeRoles("admin", "superadmin", "principal"), createStudent)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent", "principal"), listStudents);
 
 // ─── Student self-profile (student role only, must be BEFORE /:id) ─────────
 router.get("/me", authorizeRoles("student"), getMyStudentProfile);
 
 router
   .route("/:id")
-  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent"), getStudent)
-  .put(authorizeRoles("admin", "superadmin"), updateStudent)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "accountant", "student", "parent", "principal"), getStudent)
+  .put(authorizeRoles("admin", "superadmin", "principal"), updateStudent)
   .delete(authorizeRoles("admin", "superadmin"), deleteStudent);
 
 router.post(
   "/:id/documents",
-  authorizeRoles("admin", "superadmin"),
+  authorizeRoles("admin", "superadmin", "principal"),
   upload.array("documents", 10), // up to 10 files at once
   uploadDocuments
 );

@@ -12,7 +12,7 @@ const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["superadmin", "admin", "teacher", "student", "parent", "accountant"]),
+  role: z.enum(["superadmin", "admin", "principal", "teacher", "student", "parent", "accountant"]),
   phone: z.string().optional(),
   schoolId: z.string().optional(),
 });
@@ -48,6 +48,7 @@ const refreshCookieOptions = {
 const roleDashboard = {
   superadmin: "/admin/dashboard",
   admin: "/admin/dashboard",
+  principal: "/principal/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
   parent: "/parent/dashboard",

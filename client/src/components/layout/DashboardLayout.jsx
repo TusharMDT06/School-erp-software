@@ -5,6 +5,7 @@ import { logoutUser } from "../../features/auth/authSlice";
 import { joinUserRoom, getSocket } from "../../utils/socket";
 import toast from "react-hot-toast";
 import AIChatWidget from "../ai/AIChatWidget";
+import { getApprovalCountsApi } from "../../api/approvalApi";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -27,6 +28,7 @@ import {
   BarChart3,
   Sparkles,
   CalendarCheck,
+  Calendar,
   Wallet,
   UserCog,
   RotateCcw,
@@ -37,42 +39,72 @@ import {
   History,
   ArrowRightLeft,
   FileText,
+  HeartHandshake,
+  ShieldAlert,
 } from "lucide-react";
 
 // ── Nav config per role ────────────────────────────────────────────────────
 const NAV_ITEMS = {
+  principal: [
+    { icon: LayoutDashboard, label: "Dashboard",            path: "/principal/dashboard" },
+    { icon: CalendarCheck,   label: "Approval Center",      path: "/principal/approvals", badgeKey: "approvals" },
+    { icon: Users,           label: "Admissions CRM",       path: "/principal/admissions" },
+    { icon: BarChart3,       label: "Academics",            path: "/principal/academics" },
+    { icon: HeartHandshake,  label: "Student Welfare",      path: "/principal/welfare" },
+    { icon: UserCheck,       label: "Staff Overview",       path: "/principal/staff" },
+    { icon: ShieldAlert,     label: "Incidents",            path: "/principal/incidents" },
+    { icon: Calendar,        label: "Academic Calendar",    path: "/principal/calendar" },
+    { icon: Send,            label: "Circulars",            path: "/principal/circulars" },
+    { icon: FileText,        label: "Monthly MIS Reports",  path: "/principal/reports" },
+  ],
   admin: [
     { icon: LayoutDashboard, label: "Dashboard",            path: "/admin/dashboard" },
+    { icon: CalendarCheck,   label: "Approvals",            path: "/admin/approvals", badgeKey: "approvals" },
+    { icon: Users,           label: "Admissions CRM",       path: "/admin/admissions" },
+    { icon: BarChart3,       label: "Academics",            path: "/admin/academics" },
+    { icon: HeartHandshake,  label: "Student Welfare",      path: "/admin/welfare" },
+    { icon: UserCheck,       label: "Staff Overview",       path: "/admin/staff" },
+    { icon: ShieldAlert,     label: "Incidents",            path: "/admin/incidents" },
+    { icon: Calendar,        label: "Calendar & Holidays",  path: "/admin/calendar" },
+    { icon: Send,            label: "Circulars",            path: "/admin/circulars" },
     { icon: GraduationCap,   label: "Students",             path: "/admin/students" },
     { icon: UserCheck,       label: "Teachers",             path: "/admin/teachers" },
     { icon: UserCog,         label: "Teacher Attendance",   path: "/admin/teachers/attendance" },
     { icon: Wallet,          label: "Teacher Salary",       path: "/admin/teachers/salary" },
     { icon: BookOpen,        label: "Classes",              path: "/admin/classes" },
     { icon: ClipboardList,   label: "Attendance",           path: "/admin/attendance" },
-    { icon: CalendarCheck,   label: "Leave Approvals",      path: "/admin/leaves" },
     { icon: DollarSign,      label: "Fee Structures",       path: "/admin/fees" },
     { icon: AlertTriangle,   label: "Fee Defaulters",       path: "/admin/fees/defaulters" },
     { icon: Award,           label: "Exams Setup",          path: "/admin/exams" },
     { icon: Send,            label: "Publish Results",      path: "/admin/exams/publish" },
     { icon: BarChart3,       label: "Exam Analytics",       path: "/admin/exams/analytics" },
+    { icon: FileText,        label: "Monthly MIS Reports",  path: "/admin/mis-reports" },
     { icon: FileText,        label: "Financial Reports",    path: "/admin/reports" },
     { icon: History,         label: "Audit Logs",           path: "/admin/audit-logs" },
     { icon: Settings,        label: "Settings",             path: "/admin/settings" },
   ],
   superadmin: [
     { icon: LayoutDashboard, label: "Dashboard",            path: "/admin/dashboard" },
+    { icon: CalendarCheck,   label: "Approvals",            path: "/admin/approvals", badgeKey: "approvals" },
+    { icon: Users,           label: "Admissions CRM",       path: "/admin/admissions" },
+    { icon: BarChart3,       label: "Academics",            path: "/admin/academics" },
+    { icon: HeartHandshake,  label: "Student Welfare",      path: "/admin/welfare" },
+    { icon: UserCheck,       label: "Staff Overview",       path: "/admin/staff" },
+    { icon: ShieldAlert,     label: "Incidents",            path: "/admin/incidents" },
+    { icon: Calendar,        label: "Calendar & Holidays",  path: "/admin/calendar" },
+    { icon: Send,            label: "Circulars",            path: "/admin/circulars" },
     { icon: GraduationCap,   label: "Students",             path: "/admin/students" },
     { icon: UserCheck,       label: "Teachers",             path: "/admin/teachers" },
     { icon: UserCog,         label: "Teacher Attendance",   path: "/admin/teachers/attendance" },
     { icon: Wallet,          label: "Teacher Salary",       path: "/admin/teachers/salary" },
     { icon: BookOpen,        label: "Classes",              path: "/admin/classes" },
     { icon: ClipboardList,   label: "Attendance",           path: "/admin/attendance" },
-    { icon: CalendarCheck,   label: "Leave Approvals",      path: "/admin/leaves" },
     { icon: DollarSign,      label: "Fee Structures",       path: "/admin/fees" },
     { icon: AlertTriangle,   label: "Fee Defaulters",       path: "/admin/fees/defaulters" },
     { icon: Award,           label: "Exams Setup",          path: "/admin/exams" },
     { icon: Send,            label: "Publish Results",      path: "/admin/exams/publish" },
     { icon: BarChart3,       label: "Exam Analytics",       path: "/admin/exams/analytics" },
+    { icon: FileText,        label: "Monthly MIS Reports",  path: "/admin/mis-reports" },
     { icon: FileText,        label: "Financial Reports",    path: "/admin/reports" },
     { icon: History,         label: "Audit Logs",           path: "/admin/audit-logs" },
     { icon: Users,           label: "Schools",              path: "/admin/schools" },
@@ -83,20 +115,29 @@ const NAV_ITEMS = {
     { icon: GraduationCap,   label: "My Students",     path: "/teacher/students" },
     { icon: ClipboardList,   label: "Attendance",      path: "/teacher/attendance" },
     { icon: Award,           label: "Marks Entry",     path: "/teacher/marks" },
+    { icon: BarChart3,       label: "Academics",       path: "/teacher/academics" },
+    { icon: HeartHandshake,  label: "Student Welfare", path: "/teacher/welfare" },
+    { icon: ShieldAlert,     label: "Incidents",       path: "/teacher/incidents" },
     { icon: BookOpen,        label: "Classes",         path: "/teacher/classes" },
     { icon: Receipt,         label: "My Payslips",     path: "/teacher/payslips" },
+    { icon: Calendar,        label: "Calendar",        path: "/calendar" },
+    { icon: Send,            label: "Circulars",       path: "/circulars" },
   ],
   student: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/student/dashboard" },
     { icon: ClipboardList,   label: "My Attendance",   path: "/student/attendance" },
     { icon: Award,           label: "My Results",      path: "/student/results" },
     { icon: Receipt,         label: "Fee Status",      path: "/student/fees" },
+    { icon: Calendar,        label: "Calendar",        path: "/calendar" },
+    { icon: Send,            label: "Circulars",       path: "/circulars" },
   ],
   parent: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/parent/dashboard" },
     { icon: ClipboardList,   label: "Attendance",      path: "/parent/attendance" },
     { icon: Award,           label: "Exam Results",    path: "/parent/results" },
     { icon: DollarSign,      label: "Pay Fees",        path: "/parent/fees" },
+    { icon: Calendar,        label: "Calendar",        path: "/calendar" },
+    { icon: Send,            label: "Circulars",       path: "/circulars" },
   ],
   accountant: [
     { icon: LayoutDashboard, label: "Dashboard",        path: "/accountant/dashboard" },
@@ -121,6 +162,7 @@ const NAV_ITEMS = {
 const ROLE_COLORS = {
   superadmin: "from-purple-500 to-purple-700",
   admin: "from-[#1F4E79] to-[#2563a8]",
+  principal: "from-blue-700 to-indigo-800",
   teacher: "from-emerald-500 to-emerald-700",
   student: "from-sky-500 to-sky-700",
   parent: "from-amber-500 to-amber-700",
@@ -138,6 +180,7 @@ const SidebarContent = ({
   onItemClick,
   onLogout,
   onClose,
+  approvalPendingCount = 0,
   isMobile = false,
 }) => (
   <aside className="flex flex-col h-full bg-white border-r border-slate-100 shadow-sm select-none">
@@ -209,7 +252,18 @@ const SidebarContent = ({
               }`}
             />
             <span className="truncate">{item.label}</span>
-            {active && <ChevronRight className="w-3.5 h-3.5 ml-auto flex-shrink-0" />}
+            {item.badgeKey === "approvals" && approvalPendingCount > 0 && (
+              <span
+                className={`ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                  active ? "bg-white text-[#1F4E79]" : "bg-amber-500 text-white"
+                }`}
+              >
+                {approvalPendingCount}
+              </span>
+            )}
+            {active && (!item.badgeKey || approvalPendingCount === 0) && (
+              <ChevronRight className="w-3.5 h-3.5 ml-auto flex-shrink-0" />
+            )}
           </Link>
         );
       })}
@@ -234,9 +288,22 @@ const DashboardLayout = () => {
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [approvalCount, setApprovalCount] = useState(0);
 
   const navItems = NAV_ITEMS[user?.role] || NAV_ITEMS.admin;
   const roleColor = ROLE_COLORS[user?.role] || ROLE_COLORS.admin;
+
+  // Fetch pending approval counts for badge (principal, admin, superadmin)
+  useEffect(() => {
+    if (["principal", "admin", "superadmin"].includes(user?.role)) {
+      getApprovalCountsApi()
+        .then((res) => {
+          const total = res.data?.data?.totalPending || res.data?.totalPending || 0;
+          setApprovalCount(total);
+        })
+        .catch(() => {});
+    }
+  }, [user?.role, location.pathname]);
 
   // Auto-close mobile sidebar whenever route location changes
   useEffect(() => {
@@ -367,6 +434,7 @@ const DashboardLayout = () => {
           navItems={navItems}
           isActive={isActive}
           onLogout={handleLogout}
+          approvalPendingCount={approvalCount}
         />
       </div>
 
@@ -390,6 +458,7 @@ const DashboardLayout = () => {
               onItemClick={() => setSidebarOpen(false)}
               onLogout={handleLogout}
               onClose={() => setSidebarOpen(false)}
+              approvalPendingCount={approvalCount}
               isMobile={true}
             />
           </div>

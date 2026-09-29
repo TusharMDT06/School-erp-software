@@ -19,6 +19,7 @@ const schema = yup.object({
 const ROLE_REDIRECT = {
   superadmin: "/admin/dashboard",
   admin: "/admin/dashboard",
+  principal: "/principal/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
   parent: "/parent/dashboard",
@@ -28,7 +29,7 @@ const ROLE_REDIRECT = {
 // ── Demo Accounts for Recruiter ────────────────────────────────────────────
 const DEMO_ACCOUNTS = [
   { label: "Admin", role: "superadmin", email: "demo@school.edu", password: "Password@123" },
-  { label: "Principal", role: "admin", email: "principal@school.edu", password: "Admin@123" },
+  { label: "Principal", role: "principal", email: "principal@school.edu", password: "Password@123" },
   { label: "Teacher", role: "teacher", email: "vikram.maths@school.edu", password: "Password@123" },
   { label: "Student", role: "student", email: "aarav.student@school.edu", password: "Password@123" },
   { label: "Parent", role: "parent", email: "parent@school.edu", password: "Password@123" },
@@ -216,8 +217,17 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Footer & Self-Signup Link */}
+          {/* Footer & Self-Signup / Admission Links */}
           <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-2">
+            <p className="text-xs text-slate-600">
+              Prospective parent?{" "}
+              <Link
+                to="/enquire"
+                className="text-indigo-600 font-semibold hover:underline"
+              >
+                Admission enquiry →
+              </Link>
+            </p>
             <p className="text-xs text-slate-600">
               New student?{" "}
               <Link

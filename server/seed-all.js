@@ -104,8 +104,8 @@ const seedDatabase = async () => {
     const principal = await User.create({
       name: "Dr. Rajeshwar Sharma",
       email: "principal@school.edu",
-      password: "Admin@123",
-      role: "admin",
+      password: "Password@123",
+      role: "principal",
       schoolId: school._id,
       phone: "+91 98765 43211",
       profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093343/school_erp/profiles/admin_principal_rajeshwar.jpg",
@@ -710,7 +710,7 @@ const seedDatabase = async () => {
     console.log("────────────────────────────────────────────────────────");
     console.log("👑 Super Admin:  admin@school.edu       / Admin@123");
     console.log("👑 Super Admin:  tusharrajput857@gmail.com / Admin@123");
-    console.log("🏫 Principal:    principal@school.edu   / Admin@123");
+    console.log("🏫 Principal:    principal@school.edu   / Password@123");
     console.log("💼 Accountant:   accountant@school.edu  / Password@123");
     console.log("👨‍🏫 Teacher:      vikram.maths@school.edu / Password@123");
     console.log("👨‍👩‍👦 Parent 1:     parent@school.edu      / Password@123  (Guardian of Aarav & Rohan)");

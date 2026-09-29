@@ -7,6 +7,10 @@ const initFeeReminderJob = require("./src/jobs/feeReminder.job");
 const { initCallFallbackJob } = require("./src/jobs/callFallbackCheck.job");
 const { initFeeOverdueCallJob } = require("./src/jobs/feeOverdueCallCheck.job");
 const initFinanceInsightsJob = require("./src/jobs/financeInsights.job");
+const { startWelfareCron } = require("./src/jobs/welfareRiskCheck.job");
+const { startInquiryCron } = require("./src/jobs/inquiryFollowUpCheck.job");
+const { startMonthlyReportCron } = require("./src/jobs/monthlyReportGen.job");
+const { startMorningBriefCron } = require("./src/jobs/morningBrief.job");
 
 const PORT = process.env.PORT || 5000;
 
@@ -18,6 +22,10 @@ const PORT = process.env.PORT || 5000;
  *    - Daily Fee Email Reminders (09:00 AM)
  *    - Daily Fee Overdue Automated Voice Calls (10:00 AM)
  *    - 10-Minute Call Fallback Safety-Net Check
+ *    - Nightly Student Welfare Early-Warning Risk Assessment (02:00 AM)
+ *    - Daily Admissions Inquiry Follow-Up Digest (09:00 AM)
+ *    - 1st-of-Month Executive MIS Report Generator (07:00 AM)
+ *    - Working-Day AI Morning Executive Brief (07:30 AM)
  * 4. Start listening on PORT
  */
 const startServer = async () => {
@@ -31,6 +39,10 @@ const startServer = async () => {
   initFeeOverdueCallJob();
   initCallFallbackJob();
   initFinanceInsightsJob();
+  startWelfareCron();
+  startInquiryCron();
+  startMonthlyReportCron();
+  startMorningBriefCron();
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);

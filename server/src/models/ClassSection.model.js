@@ -28,6 +28,11 @@ const classSectionSchema = new mongoose.Schema(
       required: [true, "Academic year is required"],
       trim: true,
     },
+    capacity: {
+      type: Number,
+      default: null,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

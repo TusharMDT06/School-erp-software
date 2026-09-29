@@ -6,6 +6,7 @@ const User = require("../models/User.model");
 const ClassSection = require("../models/ClassSection.model");
 const CallLog = require("../models/CallLog.model");
 const { sendParentAlert } = require("../services/parentAlert.service");
+const { isQuietTime } = require("../utils/commsGuard");
 
 /**
  * Scans all overdue fee transactions, identifies qualifying accounts
@@ -16,6 +17,14 @@ const runFeeOverdueCallCheck = async () => {
     console.log("⏰ [Fee Overdue Call Job] Starting overdue fee scan for automated calls...");
 
     const now = new Date();
+
+    // Check quiet hours before scanning (no calls between 8 PM - 8 AM)
+    const generalQuiet = await isQuietTime(null, now, "phone");
+    if (generalQuiet.isQuiet) {
+      console.log(`⏸️ [Fee Overdue Call Job] Postponing scan: ${generalQuiet.reason}. Next allowed window: ${generalQuiet.nextAllowedTime}`);
+      return;
+    }
+
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
     // Find all transactions that are overdue or pending with passed due date
@@ -81,6 +90,14 @@ const runFeeOverdueCallCheck = async () => {
         console.warn(
           `⚠️ [Fee Overdue Call Job] No guardian or student phone number found for Student: "${studentName}" (Tx ID: ${tx._id})`
         );
+        continue;
+      }
+
+      // Check school-specific non-working day or holiday
+      const schoolQuiet = await isQuietTime(tx.feeStructureId.schoolId, now, "phone");
+      if (schoolQuiet.isQuiet) {
+        console.log(`⏸️ [Fee Overdue Call Job] Postponing call for "${studentName}" (${schoolQuiet.reason}).`);
+        skippedCount++;
         continue;
       }
 

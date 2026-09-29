@@ -15,13 +15,13 @@ router.use(authMiddleware);
 
 router
   .route("/")
-  .post(authorizeRoles("admin", "superadmin"), createTeacher)
-  .get(authorizeRoles("admin", "superadmin", "teacher"), listTeachers);
+  .post(authorizeRoles("admin", "superadmin", "principal"), createTeacher)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "principal"), listTeachers);
 
 router
   .route("/:id")
-  .get(authorizeRoles("admin", "superadmin", "teacher"), getTeacher)
-  .put(authorizeRoles("admin", "superadmin"), updateTeacher)
+  .get(authorizeRoles("admin", "superadmin", "teacher", "principal"), getTeacher)
+  .put(authorizeRoles("admin", "superadmin", "principal"), updateTeacher)
   .delete(authorizeRoles("admin", "superadmin"), deleteTeacher);
 
 module.exports = router;

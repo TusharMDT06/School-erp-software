@@ -21,8 +21,8 @@ const payrollRunSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["draft", "approved", "paid"],
-        message: "Status must be draft, approved, or paid",
+        values: ["draft", "approved", "paid", "rejected"],
+        message: "Status must be draft, approved, paid, or rejected",
       },
       default: "draft",
       index: true,

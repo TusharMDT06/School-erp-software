@@ -10,9 +10,11 @@ import {
   CheckCheck,
   AlertCircle,
   HelpCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { getClassesApi } from "../../api/classApi";
 import { getStudentsApi } from "../../api/studentApi";
+import { getEventsApi } from "../../api/calendarApi";
 import {
   markAttendance,
   fetchClassAttendanceByDate,
@@ -56,6 +58,9 @@ const getTodayDateString = () => {
 const MarkAttendance = () => {
   const dispatch = useDispatch();
   const { marking } = useSelector((state) => state.attendance);
+  const { user } = useSelector((state) => state.auth);
+
+  const canOverride = ["principal", "admin", "superadmin"].includes(user?.role);
 
   const [classes, setClasses] = useState([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
@@ -66,6 +71,47 @@ const MarkAttendance = () => {
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [attendanceRecords, setAttendanceRecords] = useState({}); // { [studentId]: { status: 'present', remarks: '' } }
   const [isExistingMarked, setIsExistingMarked] = useState(false);
+
+  // Holiday / Non-working day state
+  const [nonWorkingInfo, setNonWorkingInfo] = useState({ isNonWorking: false, reason: "" });
+  const [forceMark, setForceMark] = useState(false);
+  const [forceReason, setForceReason] = useState("");
+
+  // Check holiday on selected date
+  useEffect(() => {
+    const checkWorkingDay = async () => {
+      try {
+        const d = new Date(selectedDate + "T00:00:00");
+        const isSunday = d.getDay() === 0;
+
+        const res = await getEventsApi({ from: selectedDate, to: selectedDate });
+        const events = res.data?.data || res.data || [];
+        const holidayEvent = events.find(
+          (e) => (e.type === "holiday" || e.type === "vacation") && e.status === "published"
+        );
+
+        if (holidayEvent) {
+          setNonWorkingInfo({ isNonWorking: true, reason: `Holiday: ${holidayEvent.title}` });
+        } else if (isSunday) {
+          setNonWorkingInfo({ isNonWorking: true, reason: "Weekly Off (Sunday)" });
+        } else {
+          setNonWorkingInfo({ isNonWorking: false, reason: "" });
+          setForceMark(false);
+        }
+      } catch (err) {
+        // Fallback to Sunday check
+        const isSunday = new Date(selectedDate + "T00:00:00").getDay() === 0;
+        if (isSunday) {
+          setNonWorkingInfo({ isNonWorking: true, reason: "Weekly Off (Sunday)" });
+        } else {
+          setNonWorkingInfo({ isNonWorking: false, reason: "" });
+        }
+      }
+    };
+    if (selectedDate) {
+      checkWorkingDay();
+    }
+  }, [selectedDate]);
 
   // Load teacher's classes on mount
   useEffect(() => {
@@ -146,6 +192,7 @@ const MarkAttendance = () => {
 
   // Status toggle handler
   const handleStatusChange = (studentId, status) => {
+    if (nonWorkingInfo.isNonWorking && !forceMark) return;
     setAttendanceRecords((prev) => ({
       ...prev,
       [studentId]: {
@@ -157,6 +204,7 @@ const MarkAttendance = () => {
 
   // Remarks change handler
   const handleRemarksChange = (studentId, remarks) => {
+    if (nonWorkingInfo.isNonWorking && !forceMark) return;
     setAttendanceRecords((prev) => ({
       ...prev,
       [studentId]: {
@@ -168,6 +216,7 @@ const MarkAttendance = () => {
 
   // Bulk actions
   const setAllStatus = (status) => {
+    if (nonWorkingInfo.isNonWorking && !forceMark) return;
     setAttendanceRecords((prev) => {
       const updated = { ...prev };
       students.forEach((st) => {
@@ -184,6 +233,16 @@ const MarkAttendance = () => {
   // Submit attendance
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (nonWorkingInfo.isNonWorking && !forceMark) {
+      toast.error(`Cannot mark attendance on non-working day: ${nonWorkingInfo.reason}`);
+      return;
+    }
+
+    if (nonWorkingInfo.isNonWorking && forceMark && !forceReason.trim()) {
+      toast.error("Please provide an override reason to force mark on a non-working day.");
+      return;
+    }
 
     if (!selectedClassId) {
       toast.error("Please select a class.");
@@ -207,6 +266,8 @@ const MarkAttendance = () => {
           classId: selectedClassId,
           date: selectedDate,
           records,
+          forceMark: forceMark || undefined,
+          reason: forceMark ? forceReason : undefined,
         })
       ).unwrap();
 
@@ -231,6 +292,8 @@ const MarkAttendance = () => {
     { present: 0, absent: 0, late: 0, leave: 0 }
   );
 
+  const isAttendanceDisabled = nonWorkingInfo.isNonWorking && !forceMark;
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -249,6 +312,46 @@ const MarkAttendance = () => {
           </div>
         )}
       </div>
+
+      {/* Non-working Day Banner */}
+      {nonWorkingInfo.isNonWorking && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-300 text-amber-900 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-amber-900">
+                Non-Working Day: {nonWorkingInfo.reason}
+              </p>
+              <p className="text-xs text-amber-800/80 mt-0.5">
+                Attendance marking is greyed out. Only authorized administrators and principals may override.
+              </p>
+            </div>
+          </div>
+
+          {canOverride && (
+            <div className="flex items-center gap-3 bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-amber-300">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                <input
+                  type="checkbox"
+                  checked={forceMark}
+                  onChange={(e) => setForceMark(e.target.checked)}
+                  className="rounded text-[#1F4E79] focus:ring-[#1F4E79] w-4 h-4"
+                />
+                Force Mark Override
+              </label>
+              {forceMark && (
+                <input
+                  type="text"
+                  placeholder="Reason for force-marking..."
+                  value={forceReason}
+                  onChange={(e) => setForceReason(e.target.value)}
+                  className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1F4E79]"
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Control Filters: Class & Date */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
@@ -321,16 +424,18 @@ const MarkAttendance = () => {
         <div className="flex items-center gap-2 self-end md:self-auto">
           <button
             type="button"
+            disabled={isAttendanceDisabled}
             onClick={() => setAllStatus("present")}
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition shadow-2xs flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition shadow-2xs flex items-center gap-1.5"
           >
             <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
             Mark All Present
           </button>
           <button
             type="button"
+            disabled={isAttendanceDisabled}
             onClick={() => setAllStatus("absent")}
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition shadow-2xs text-rose-700"
+            className="px-3 py-1.5 bg-white hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition shadow-2xs text-rose-700"
           >
             Mark All Absent
           </button>
@@ -339,7 +444,11 @@ const MarkAttendance = () => {
 
       {/* Student Roster Table */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div
+          className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden transition-all duration-200 ${
+            isAttendanceDisabled ? "opacity-60 pointer-events-none select-none bg-slate-50/80" : ""
+          }`}
+        >
           {loadingStudents ? (
             <div className="p-12 text-center text-slate-400">
               <Loader2 className="w-7 h-7 animate-spin mx-auto mb-2 text-[#1F4E79]" />
@@ -429,13 +538,18 @@ const MarkAttendance = () => {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="submit"
-              disabled={marking || loadingStudents}
-              className="px-6 py-3 bg-[#1F4E79] hover:bg-[#183e60] disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-sm shadow-[#1F4E79]/30 transition flex items-center gap-2"
+              disabled={marking || loadingStudents || isAttendanceDisabled}
+              className="px-6 py-3 bg-[#1F4E79] hover:bg-[#183e60] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm shadow-[#1F4E79]/30 transition flex items-center gap-2"
             >
               {marking ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Saving Attendance...
+                </>
+              ) : isAttendanceDisabled ? (
+                <>
+                  <AlertCircle className="w-4 h-4" />
+                  Attendance Disabled (Holiday)
                 </>
               ) : (
                 <>

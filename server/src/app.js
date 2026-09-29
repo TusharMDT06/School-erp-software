@@ -34,6 +34,17 @@ const reportRoutes = require("./routes/report.routes");
 const reconciliationRoutes = require("./routes/reconciliation.routes");
 const razorpayWebhookRoutes = require("./routes/razorpayWebhook.routes");
 const auditLogRoutes = require("./routes/auditLog.routes");
+const calendarRoutes = require("./routes/calendar.routes");
+const circularRoutes = require("./routes/circular.routes");
+const approvalRoutes = require("./routes/approval.routes");
+const principalRoutes = require("./routes/principal.routes");
+const academicsRoutes = require("./routes/academics.routes");
+const welfareRoutes = require("./routes/welfare.routes");
+const staffRoutes = require("./routes/staff.routes");
+const substitutionRoutes = require("./routes/substitution.routes");
+const incidentRoutes = require("./routes/incident.routes");
+const inquiryRoutes = require("./routes/inquiry.routes");
+const monthlyReportRoutes = require("./routes/monthlyReport.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -143,6 +154,17 @@ app.use("/api/payroll", payrollRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/reconciliation", reconciliationRoutes);
 app.use("/api/audit-logs", auditLogRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/circulars", circularRoutes);
+app.use("/api/approvals", approvalRoutes);
+app.use("/api/principal", principalRoutes);
+app.use("/api/principal/academics", academicsRoutes);
+app.use("/api/principal/staff", staffRoutes);
+app.use("/api/welfare", welfareRoutes);
+app.use("/api/substitutions", substitutionRoutes);
+app.use("/api/incidents", incidentRoutes);
+app.use("/api", inquiryRoutes);
+app.use("/api/principal/reports", monthlyReportRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
