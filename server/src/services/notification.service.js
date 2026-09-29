@@ -357,6 +357,93 @@ ${message}
       </div>
     </div>
   `,
+
+  homework_due_reminder: ({ title, message, data = {}, userName = "Student" }) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 24px; color: #ffffff;">
+        <span style="background: rgba(255, 255, 255, 0.2); font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; padding: 4px 10px; border-radius: 999px;">Reminder</span>
+        <h1 style="margin: 12px 0 0 0; font-size: 20px; font-weight: bold; color: #ffffff;">⏰ Homework Due Tomorrow</h1>
+      </div>
+      <div style="padding: 24px; color: #1e293b; line-height: 1.6;">
+        <p style="margin-top: 0; font-size: 15px;">Dear <strong>${userName}</strong>,</p>
+        <p style="font-size: 15px; color: #334155;">${message || `This is a reminder that your assignment is due tomorrow.`}</p>
+        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 14px 18px; margin: 18px 0;">
+          <p style="margin: 0; font-size: 14px; color: #92400e;">
+            <strong>Subject:</strong> ${data.subject || "Academic"} | <strong>Title:</strong> ${data.homeworkTitle || title}
+          </p>
+          ${data.dueDate ? `<p style="margin: 6px 0 0 0; font-size: 13px; color: #b45309;"><strong>Due Date:</strong> ${new Date(data.dueDate).toLocaleDateString("en-IN", { dateStyle: "full" })}</p>` : ""}
+        </div>
+        <p style="font-size: 13px; color: #64748b;">Please log in to your student portal to review requirements and submit your work on time.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; margin: 0;">Automated notification from School ERP.</p>
+      </div>
+    </div>
+  `,
+
+  homework_reviewed: ({ title, message, data = {}, userName = "Student" }) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; color: #ffffff;">
+        <span style="background: rgba(255, 255, 255, 0.2); font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; padding: 4px 10px; border-radius: 999px;">Evaluation</span>
+        <h1 style="margin: 12px 0 0 0; font-size: 20px; font-weight: bold; color: #ffffff;">📝 Homework Reviewed</h1>
+      </div>
+      <div style="padding: 24px; color: #1e293b; line-height: 1.6;">
+        <p style="margin-top: 0; font-size: 15px;">Dear <strong>${userName}</strong>,</p>
+        <p style="font-size: 15px; color: #334155;">Your teacher has reviewed your homework: <strong>${data.homeworkTitle || title}</strong>.</p>
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 18px; margin: 18px 0;">
+          ${data.marks !== undefined && data.marks !== null ? `<p style="margin: 0; font-size: 15px; font-weight: bold; color: #166534;">Marks: ${data.marks} ${data.maxMarks ? `/ ${data.maxMarks}` : ""}</p>` : ""}
+          ${data.feedback ? `<p style="margin: 8px 0 0 0; font-size: 14px; color: #14532d;"><strong>Teacher Feedback:</strong> <em>"${data.feedback}"</em></p>` : ""}
+          ${data.requestResubmit ? `<p style="margin: 8px 0 0 0; font-size: 13px; color: #b91c1c; font-weight: bold;">⚠️ Resubmission has been requested.</p>` : ""}
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">Automated notification from School ERP Homework Module.</p>
+      </div>
+    </div>
+  `,
+
+  homework_digest: ({ title, message, data = {}, userName = "Parent/Student" }) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); padding: 24px; color: #ffffff;">
+        <span style="background: rgba(255, 255, 255, 0.2); font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; padding: 4px 10px; border-radius: 999px;">Daily Academic Summary</span>
+        <h1 style="margin: 12px 0 0 0; font-size: 20px; font-weight: bold; color: #ffffff;">📚 Daily Homework Digest</h1>
+      </div>
+      <div style="padding: 24px; color: #1e293b; line-height: 1.6;">
+        <p style="margin-top: 0; font-size: 15px;">Dear <strong>${userName}</strong>,</p>
+        <p style="font-size: 14px; color: #475569;">Here is the consolidated digest of homework assigned today (${new Date().toLocaleDateString("en-IN", { dateStyle: "medium" })}):</p>
+        <div style="margin: 16px 0;">
+          ${(data.homeworkList || [])
+            .map(
+              (hw) => `
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;">
+              <h4 style="margin: 0 0 4px 0; font-size: 14px; color: #1e293b;">${hw.title} <span style="font-weight: normal; color: #64748b;">(${hw.subject})</span></h4>
+              <p style="margin: 0; font-size: 12px; color: #64748b;"><strong>Due:</strong> ${new Date(hw.dueDate).toLocaleDateString("en-IN", { dateStyle: "medium" })}</p>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">Sent automatically at 6:00 PM by School ERP.</p>
+      </div>
+    </div>
+  `,
+
+  attendance_correction: ({ title, message, data = {}, userName = "Teacher" }) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); padding: 24px; color: #ffffff;">
+        <span style="background: rgba(255, 255, 255, 0.2); font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; padding: 4px 10px; border-radius: 999px;">Attendance Request</span>
+        <h1 style="margin: 12px 0 0 0; font-size: 20px; font-weight: bold; color: #ffffff;">📋 Attendance Correction Update</h1>
+      </div>
+      <div style="padding: 24px; color: #1e293b; line-height: 1.6;">
+        <p style="margin-top: 0; font-size: 15px;">Dear <strong>${userName}</strong>,</p>
+        <p style="font-size: 15px; color: #334155;">${message}</p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 18px 0;">
+          <p style="margin: 0; font-size: 14px; color: #475569;">
+            <strong>Status:</strong> <span style="text-transform: uppercase; font-weight: bold; color: ${data.status === "approved" ? "#16a34a" : "#dc2626"};">${data.status || "Updated"}</span>
+          </p>
+          ${data.remarks ? `<p style="margin: 6px 0 0 0; font-size: 13px; color: #64748b;"><strong>Remarks:</strong> ${data.remarks}</p>` : ""}
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">Automated notification from School ERP Attendance System.</p>
+      </div>
+    </div>
+  `,
 };
 
 /**

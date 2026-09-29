@@ -11,6 +11,8 @@ const { startWelfareCron } = require("./src/jobs/welfareRiskCheck.job");
 const { startInquiryCron } = require("./src/jobs/inquiryFollowUpCheck.job");
 const { startMonthlyReportCron } = require("./src/jobs/monthlyReportGen.job");
 const { startMorningBriefCron } = require("./src/jobs/morningBrief.job");
+const { startHomeworkDueReminderCron } = require("./src/jobs/homeworkDueReminderCron.job");
+const { startHomeworkDigestCron } = require("./src/jobs/homeworkDigestCron.job");
 
 const PORT = process.env.PORT || 5000;
 
@@ -26,6 +28,8 @@ const PORT = process.env.PORT || 5000;
  *    - Daily Admissions Inquiry Follow-Up Digest (09:00 AM)
  *    - 1st-of-Month Executive MIS Report Generator (07:00 AM)
  *    - Working-Day AI Morning Executive Brief (07:30 AM)
+ *    - Homework Due Reminder Cron (05:00 PM)
+ *    - Homework Daily Digest Cron (06:00 PM)
  * 4. Start listening on PORT
  */
 const startServer = async () => {
@@ -43,6 +47,8 @@ const startServer = async () => {
   startInquiryCron();
   startMonthlyReportCron();
   startMorningBriefCron();
+  startHomeworkDueReminderCron();
+  startHomeworkDigestCron();
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);

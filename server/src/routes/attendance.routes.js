@@ -7,11 +7,35 @@ const {
   getStudentAttendanceReport,
   getClassAttendanceSummary,
 } = require("../controllers/attendance.controller");
+const {
+  createCorrectionRequest,
+  decideCorrectionRequest,
+  getCorrectionRequests,
+} = require("../controllers/attendanceCorrection.controller");
 
 const router = express.Router();
 
 // All attendance routes require authentication
 router.use(authMiddleware);
+
+// ── Attendance Correction Window Routes ──────────────────────────────────
+router.post(
+  "/corrections",
+  authorizeRoles("teacher"),
+  createCorrectionRequest
+);
+
+router.get(
+  "/corrections",
+  authorizeRoles("teacher", "principal", "admin", "superadmin"),
+  getCorrectionRequests
+);
+
+router.put(
+  "/corrections/:id/decide",
+  authorizeRoles("principal", "admin", "superadmin"),
+  decideCorrectionRequest
+);
 
 // ── Mark attendance (Bulk upsert) ──────────────────────────────────────────
 router.post(
@@ -42,3 +66,4 @@ router.get(
 );
 
 module.exports = router;
+

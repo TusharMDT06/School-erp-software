@@ -41,6 +41,7 @@ import {
   FileText,
   HeartHandshake,
   ShieldAlert,
+  Layers,
 } from "lucide-react";
 
 // ── Nav config per role ────────────────────────────────────────────────────
@@ -112,20 +113,24 @@ const NAV_ITEMS = {
   ],
   teacher: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/teacher/dashboard" },
-    { icon: GraduationCap,   label: "My Students",     path: "/teacher/students" },
     { icon: ClipboardList,   label: "Attendance",      path: "/teacher/attendance" },
+    { icon: BookOpen,        label: "Homework",        path: "/teacher/homework" },
+    { icon: Layers,          label: "Study Materials", path: "/teacher/materials" },
     { icon: Award,           label: "Marks Entry",     path: "/teacher/marks" },
+    { icon: Calendar,        label: "Timetable",       path: "/calendar" },
+    { icon: Send,            label: "Messages",        path: "/circulars" },
+    { icon: CalendarCheck,   label: "Leave",           path: "/teacher/dashboard" },
+    { icon: Receipt,         label: "My Payslips",     path: "/teacher/payslips" },
+    { icon: GraduationCap,   label: "My Students",     path: "/teacher/students" },
     { icon: BarChart3,       label: "Academics",       path: "/teacher/academics" },
     { icon: HeartHandshake,  label: "Student Welfare", path: "/teacher/welfare" },
     { icon: ShieldAlert,     label: "Incidents",       path: "/teacher/incidents" },
-    { icon: BookOpen,        label: "Classes",         path: "/teacher/classes" },
-    { icon: Receipt,         label: "My Payslips",     path: "/teacher/payslips" },
-    { icon: Calendar,        label: "Calendar",        path: "/calendar" },
-    { icon: Send,            label: "Circulars",       path: "/circulars" },
   ],
   student: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/student/dashboard" },
     { icon: ClipboardList,   label: "My Attendance",   path: "/student/attendance" },
+    { icon: BookOpen,        label: "Homework",        path: "/student/homework" },
+    { icon: Layers,          label: "Study Materials", path: "/student/materials" },
     { icon: Award,           label: "My Results",      path: "/student/results" },
     { icon: Receipt,         label: "Fee Status",      path: "/student/fees" },
     { icon: Calendar,        label: "Calendar",        path: "/calendar" },
@@ -134,6 +139,7 @@ const NAV_ITEMS = {
   parent: [
     { icon: LayoutDashboard, label: "Dashboard",       path: "/parent/dashboard" },
     { icon: ClipboardList,   label: "Attendance",      path: "/parent/attendance" },
+    { icon: BookOpen,        label: "Homework",        path: "/parent/homework" },
     { icon: Award,           label: "Exam Results",    path: "/parent/results" },
     { icon: DollarSign,      label: "Pay Fees",        path: "/parent/fees" },
     { icon: Calendar,        label: "Calendar",        path: "/calendar" },

@@ -19,6 +19,7 @@ import {
   markAttendance,
   fetchClassAttendanceByDate,
 } from "../../features/attendance/attendanceSlice";
+import { createCorrectionRequestApi } from "../../api/attendanceCorrectionApi";
 
 const STATUS_OPTIONS = [
   {
@@ -70,7 +71,12 @@ const MarkAttendance = () => {
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [attendanceRecords, setAttendanceRecords] = useState({}); // { [studentId]: { status: 'present', remarks: '' } }
+  const [originalRecords, setOriginalRecords] = useState({});
   const [isExistingMarked, setIsExistingMarked] = useState(false);
+
+  // Correction Mode state for past dates
+  const [correctionReason, setCorrectionReason] = useState("");
+  const [submittingCorrection, setSubmittingCorrection] = useState(false);
 
   // Holiday / Non-working day state
   const [nonWorkingInfo, setNonWorkingInfo] = useState({ isNonWorking: false, reason: "" });
@@ -179,6 +185,7 @@ const MarkAttendance = () => {
       });
 
       setAttendanceRecords(initialMap);
+      setOriginalRecords(JSON.parse(JSON.stringify(initialMap)));
     } catch (err) {
       toast.error("Error loading student roster or existing records.");
     } finally {
@@ -282,6 +289,59 @@ const MarkAttendance = () => {
     }
   };
 
+  const todayStr = getTodayDateString();
+  const isTeacher = user?.role === "teacher";
+  const isPastDate = selectedDate < todayStr;
+  const diffDays = Math.floor(
+    (new Date(todayStr).getTime() - new Date(selectedDate).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const isCorrectionMode = isTeacher && isPastDate && diffDays <= 3;
+  const isLockedOverThreeDays = isTeacher && isPastDate && diffDays > 3;
+
+  // Submit attendance correction request (up to 3 days back)
+  const handleCorrectionSubmit = async (e) => {
+    e.preventDefault();
+    if (!correctionReason.trim()) {
+      toast.error("Please provide a mandatory reason for the attendance correction request.");
+      return;
+    }
+
+    const changes = [];
+    students.forEach((st) => {
+      const current = attendanceRecords[st._id]?.status;
+      const original = originalRecords[st._id]?.status;
+      if (current && original && current !== original) {
+        changes.push({
+          studentId: st._id,
+          studentName: st.name || st.userId?.name || "Student",
+          from: original,
+          to: current,
+        });
+      }
+    });
+
+    if (changes.length === 0) {
+      toast.error("No attendance changes detected. Please modify at least one student status before submitting a correction request.");
+      return;
+    }
+
+    try {
+      setSubmittingCorrection(true);
+      await createCorrectionRequestApi({
+        classId: selectedClassId,
+        date: selectedDate,
+        changes,
+        reason: correctionReason.trim(),
+      });
+      toast.success(`Correction request for ${changes.length} student(s) submitted to Principal for approval!`);
+      setCorrectionReason("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit attendance correction request.");
+    } finally {
+      setSubmittingCorrection(false);
+    }
+  };
+
   // Statistics counters
   const counts = students.reduce(
     (acc, st) => {
@@ -292,7 +352,7 @@ const MarkAttendance = () => {
     { present: 0, absent: 0, late: 0, leave: 0 }
   );
 
-  const isAttendanceDisabled = nonWorkingInfo.isNonWorking && !forceMark;
+  const isAttendanceDisabled = (nonWorkingInfo.isNonWorking && !forceMark) || isLockedOverThreeDays;
 
   return (
     <div className="space-y-6">
@@ -350,6 +410,51 @@ const MarkAttendance = () => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Past Attendance Correction Banner */}
+      {isCorrectionMode && (
+        <div className="p-5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 shadow-sm space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-amber-950">
+                Attendance Correction Mode (Past Date: {new Date(selectedDate).toLocaleDateString("en-IN")})
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Direct editing is permitted for TODAY only. For dates in the past (up to 3 days back), update the student statuses in the table below and submit an Attendance Correction request for Principal/Admin approval.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <label className="block text-xs font-bold text-amber-900 mb-1">
+              Reason for Attendance Correction * (Required for administrative audit)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Student was attending inter-school competition; roll call discrepancy resolved..."
+              value={correctionReason}
+              onChange={(e) => setCorrectionReason(e.target.value)}
+              className="w-full px-3.5 py-2 text-sm bg-white border border-amber-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Over 3 Days Locked Banner */}
+      {isLockedOverThreeDays && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 flex items-start gap-3">
+          <ShieldAlert className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-rose-950">
+              Attendance Locked (&gt; 3 Days Old)
+            </p>
+            <p className="text-xs text-rose-800 mt-0.5">
+              Attendance records older than 3 days are locked and cannot be directly marked or requested by teachers. Please contact the school administrator for institutional adjustments.
+            </p>
+          </div>
         </div>
       )}
 
@@ -536,28 +641,58 @@ const MarkAttendance = () => {
         {/* Submit Button Bar */}
         {students.length > 0 && (
           <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={marking || loadingStudents || isAttendanceDisabled}
-              className="px-6 py-3 bg-[#1F4E79] hover:bg-[#183e60] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm shadow-[#1F4E79]/30 transition flex items-center gap-2"
-            >
-              {marking ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving Attendance...
-                </>
-              ) : isAttendanceDisabled ? (
-                <>
-                  <AlertCircle className="w-4 h-4" />
-                  Attendance Disabled (Holiday)
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  {isExistingMarked ? "Update Attendance" : "Submit Attendance"}
-                </>
-              )}
-            </button>
+            {isCorrectionMode ? (
+              <button
+                type="button"
+                onClick={handleCorrectionSubmit}
+                disabled={submittingCorrection || loadingStudents}
+                className="px-6 py-3 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center gap-2"
+              >
+                {submittingCorrection ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting Request...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    Request Attendance Correction
+                  </>
+                )}
+              </button>
+            ) : isLockedOverThreeDays ? (
+              <button
+                type="button"
+                disabled
+                className="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-400 text-sm font-semibold rounded-xl cursor-not-allowed flex items-center gap-2"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                Attendance Locked (&gt; 3 Days Old)
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={marking || loadingStudents || isAttendanceDisabled}
+                className="px-6 py-3 bg-[#1F4E79] hover:bg-[#183e60] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm shadow-[#1F4E79]/30 transition flex items-center gap-2"
+              >
+                {marking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving Attendance...
+                  </>
+                ) : isAttendanceDisabled ? (
+                  <>
+                    <AlertCircle className="w-4 h-4" />
+                    Attendance Disabled (Holiday)
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {isExistingMarked ? "Update Attendance" : "Submit Attendance"}
+                  </>
+                )}
+              </button>
+            )}
           </div>
         )}
       </form>

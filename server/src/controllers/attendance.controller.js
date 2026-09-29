@@ -3,10 +3,12 @@ const Attendance = require("../models/Attendance.model");
 const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
 const ClassSection = require("../models/ClassSection.model");
+const SubstituteAssignment = require("../models/SubstituteAssignment.model");
 const notifyAbsentee = require("../utils/notifyAbsentee");
 const { isWorkingDay } = require("../utils/workingDay");
 const auditLog = require("../utils/auditLog");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
+const { invalidateTeacherDashboardCache } = require("../utils/dashboardCache");
 
 /**
  * Normalizes a date string or Date object to UTC midnight (date-only, zero time).
@@ -82,12 +84,34 @@ const markAttendance = async (req, res, next) => {
         throw new ApiError(403, "Teacher profile not found for this account.");
       }
 
+      // Phase 9A Attendance Window: Teacher may mark or edit attendance for TODAY only,
+      // unless they have an ACTIVE substitution for that class and date.
+      const dateStr = normalizedDate.toISOString().slice(0, 10);
+      let isSubstitute = false;
+      const subAssignment = await SubstituteAssignment.findOne({
+        substituteTeacherId: teacher._id,
+        classId,
+        date: dateStr,
+        status: { $in: ["assigned", "acknowledged", "completed"] },
+      });
+      if (subAssignment) {
+        isSubstitute = true;
+      }
+
+      const isToday = normalizedDate.getTime() === todayNormalized.getTime();
+      if (!isToday && !isSubstitute) {
+        throw new ApiError(
+          403,
+          "Past attendance cannot be marked or edited directly. Please submit an Attendance Correction request (available for up to 3 days back)."
+        );
+      }
+
       // Verify teacher is authorized for this class
       const isAssigned =
         teacher.assignedClasses?.some((id) => id.toString() === classId.toString()) ||
         classSection.classTeacherId?.toString() === teacher._id.toString();
 
-      if (!isAssigned) {
+      if (!isAssigned && !isSubstitute) {
         throw new ApiError(403, "You are not assigned to mark attendance for this class.");
       }
       markedBy = teacher._id;
@@ -140,6 +164,10 @@ const markAttendance = async (req, res, next) => {
 
     // Execute bulk upsert
     await Attendance.bulkWrite(bulkOps);
+
+    if (markedBy) {
+      await invalidateTeacherDashboardCache(markedBy);
+    }
 
     // Asynchronously trigger absentee notifications without blocking the HTTP response
     if (absenteeStudentIds.length > 0) {

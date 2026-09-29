@@ -40,6 +40,14 @@ import MarkAttendance from "../pages/teacher/MarkAttendance";
 import MyAttendance from "../pages/student/MyAttendance";
 import ChildAttendance from "../pages/parent/ChildAttendance";
 
+// ── Phase 9A: Teacher Dashboard, Homework & Study Materials ─────────────────
+import TeacherDashboard from "../pages/teacher/TeacherDashboard";
+import TeacherHomework from "../pages/teacher/Homework";
+import TeacherStudyMaterials from "../pages/teacher/StudyMaterials";
+import StudentHomework from "../pages/student/Homework";
+import StudentStudyMaterials from "../pages/student/StudyMaterials";
+import ChildHomework from "../pages/parent/ChildHomework";
+
 // ── Phase 4: Fee & Finance Pages ──────────────────────────────────────────────
 import FeeStructureSetup from "../pages/admin/Fees/FeeStructureSetup";
 import DefaulterList from "../pages/admin/Fees/DefaulterList";
@@ -202,7 +210,10 @@ const AppRoutes = () => {
       {/* ── Teacher Routes ───────────────────────────────────────────── */}
       <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/teacher/dashboard" element={<DashboardPlaceholder role="Teacher" />} />
+          <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+          {/* Homework & Study Materials */}
+          <Route path="/teacher/homework" element={<TeacherHomework />} />
+          <Route path="/teacher/materials" element={<TeacherStudyMaterials />} />
           {/* Scoped student list */}
           <Route path="/teacher/students" element={<StudentList />} />
           {/* Classes */}
@@ -225,6 +236,8 @@ const AppRoutes = () => {
         <Route element={<DashboardLayout />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/student/attendance" element={<MyAttendance />} />
+          <Route path="/student/homework" element={<StudentHomework />} />
+          <Route path="/student/materials" element={<StudentStudyMaterials />} />
           <Route path="/student/fees" element={<FeeStatus />} />
           <Route path="/student/results" element={<MyResults />} />
         </Route>
@@ -236,6 +249,7 @@ const AppRoutes = () => {
           <Route path="/parent/dashboard" element={<DashboardPlaceholder role="Parent" />} />
           <Route path="/parent/children" element={<Navigate to="/parent/attendance" replace />} />
           <Route path="/parent/attendance" element={<ChildAttendance />} />
+          <Route path="/parent/homework" element={<ChildHomework />} />
           <Route path="/parent/fees" element={<PayFees />} />
           <Route path="/parent/results" element={<ChildResults />} />
         </Route>

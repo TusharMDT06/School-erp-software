@@ -5,11 +5,15 @@ const Refund = require("../models/Refund.model");
 const Expense = require("../models/Expense.model");
 const PayrollRun = require("../models/PayrollRun.model");
 const Payslip = require("../models/Payslip.model");
+const AttendanceCorrectionRequest = require("../models/AttendanceCorrectionRequest.model");
+const Attendance = require("../models/Attendance.model");
+const Teacher = require("../models/Teacher.model");
 const User = require("../models/User.model");
 const { safeGet, safeSet, safeDel } = require("../config/redis");
 const { notify, notifyMany } = require("./notification.service");
 const auditLog = require("../utils/auditLog");
 const { ApiError } = require("../utils/apiResponse");
+const { invalidateTeacherDashboardCache } = require("../utils/dashboardCache");
 
 const COUNTS_CACHE_TTL = 30; // 30 seconds
 
@@ -39,12 +43,13 @@ const getApprovalCounts = async (schoolId) => {
     } catch {}
   }
 
-  const [teacherLeave, concession, refund, expense, payrollRun] = await Promise.all([
+  const [teacherLeave, concession, refund, expense, payrollRun, attendanceCorrection] = await Promise.all([
     LeaveRequest.countDocuments({ schoolId, requesterRole: "teacher", status: "pending" }),
     FeeConcession.countDocuments({ schoolId, status: "pending" }),
     Refund.countDocuments({ schoolId, status: "pending" }),
     Expense.countDocuments({ schoolId, status: "pending_approval" }),
     PayrollRun.countDocuments({ schoolId, status: "draft" }),
+    AttendanceCorrectionRequest.countDocuments({ schoolId, status: "pending" }),
   ]);
 
   const counts = {
@@ -53,7 +58,8 @@ const getApprovalCounts = async (schoolId) => {
     refund,
     expense,
     payroll_run: payrollRun,
-    total: teacherLeave + concession + refund + expense + payrollRun,
+    attendance_correction: attendanceCorrection,
+    total: teacherLeave + concession + refund + expense + payrollRun + attendanceCorrection,
   };
 
   await safeSet(cacheKey, JSON.stringify(counts), COUNTS_CACHE_TTL);
@@ -268,6 +274,48 @@ const getApprovalsList = async (schoolId, { type = "all", status = "pending", pa
               ageDays,
               slaLevel,
               deepLink: `/accountant/payroll?runId=${i._id}`,
+              rawDetails: i,
+            };
+          })
+        )
+    );
+  }
+
+  // 6. Attendance Correction Requests
+  if (type === "all" || type === "attendance_correction") {
+    fetchTasks.push(
+      AttendanceCorrectionRequest.find({
+        schoolId,
+        status: isPending ? "pending" : { $in: ["approved", "rejected"] },
+      })
+        .populate("classId", "className section")
+        .populate("requestedBy", "name email role")
+        .populate("decidedBy", "name")
+        .sort({ createdAt: isPending ? 1 : -1 })
+        .limit(50)
+        .lean()
+        .then((items) =>
+          items.map((i) => {
+            const { ageDays, slaLevel } = computeSla(i.createdAt);
+            const dateStr = new Date(i.date).toLocaleDateString("en-IN");
+            const changeCount = (i.changes || []).length;
+            return {
+              type: "attendance_correction",
+              id: i._id.toString(),
+              title: `Attendance Correction: Class ${i.classId?.className || ""}-${i.classId?.section || ""}`,
+              summary: `${changeCount} change(s) for ${dateStr}. Reason: ${i.reason}`,
+              requesterName: i.requestedBy?.name || "Teacher",
+              requesterRole: i.requestedBy?.role || "teacher",
+              applicantId: i.requestedBy?._id?.toString(),
+              amount: null,
+              status: i.status,
+              createdAt: i.createdAt,
+              decidedAt: i.decidedAt,
+              decidedBy: i.decidedBy?.name,
+              remarks: i.remarks,
+              ageDays,
+              slaLevel,
+              deepLink: `/teacher/attendance?classId=${i.classId?._id}&date=${new Date(i.date).toISOString().slice(0, 10)}`,
               rawDetails: i,
             };
           })
@@ -521,6 +569,128 @@ const decideItem = async ({ schoolId, approverUser, type, id, decision, remarks 
       return { type, id, status: decision, message: `Payroll run ${decision}.` };
     }
 
+    case "attendance_correction": {
+      const correction = await AttendanceCorrectionRequest.findOne({ _id: id, schoolId });
+      if (!correction) throw new ApiError(404, "Attendance correction request not found.");
+
+      // Self approval guard
+      if (correction.requestedBy?.toString() === approverId) {
+        throw new ApiError(403, "You cannot approve your own attendance correction request.");
+      }
+
+      if (correction.status !== "pending") {
+        throw new ApiError(409, `Attendance correction request has already been ${correction.status}.`);
+      }
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      try {
+        correction.status = decision;
+        correction.decidedBy = approverUser._id;
+        correction.decidedAt = new Date();
+        correction.remarks = remarks;
+
+        const auditOldValues = [];
+        const auditNewValues = [];
+
+        if (decision === "approved") {
+          const bulkOps = [];
+          const teacher = await Teacher.findOne({ userId: correction.requestedBy }).session(session);
+          const markedBy = teacher ? teacher._id : approverUser._id;
+
+          for (const change of correction.changes) {
+            const existingRecord = await Attendance.findOne({
+              studentId: change.studentId,
+              date: correction.date,
+            }).session(session);
+
+            auditOldValues.push({
+              studentId: change.studentId,
+              studentName: change.studentName,
+              status: existingRecord ? existingRecord.status : "not_marked",
+            });
+
+            auditNewValues.push({
+              studentId: change.studentId,
+              studentName: change.studentName,
+              status: change.to,
+            });
+
+            bulkOps.push({
+              updateOne: {
+                filter: {
+                  studentId: change.studentId,
+                  date: correction.date,
+                },
+                update: {
+                  $set: {
+                    studentId: change.studentId,
+                    classId: correction.classId,
+                    date: correction.date,
+                    status: change.to,
+                    remarks: `Approved via Approval Center: ${remarks || correction.reason}`,
+                    markedBy,
+                  },
+                },
+                upsert: true,
+              },
+            });
+          }
+
+          if (bulkOps.length > 0) {
+            await Attendance.bulkWrite(bulkOps, { session });
+          }
+
+          if (teacher) {
+            await invalidateTeacherDashboardCache(teacher._id);
+          }
+        }
+
+        await correction.save({ session });
+        await session.commitTransaction();
+        session.endSession();
+
+        await auditLog({
+          schoolId,
+          userId: approverUser._id,
+          action: `ATTENDANCE_CORRECTION_${decision.toUpperCase()}`,
+          module: "attendance",
+          targetId: correction._id,
+          details: {
+            correctionId: correction._id,
+            date: correction.date,
+            classId: correction.classId,
+            decision,
+            remarks,
+            oldValues: auditOldValues,
+            newValues: auditNewValues,
+          },
+          ip,
+        });
+
+        notify(correction.requestedBy, {
+          type: "attendance_correction",
+          title: `Attendance Correction ${decision === "approved" ? "Approved" : "Rejected"}`,
+          message: `Your attendance correction request for ${new Date(correction.date).toLocaleDateString("en-IN")} has been ${decision}.${remarks ? ` Remarks: ${remarks}` : ""}`,
+          data: {
+            correctionId: correction._id,
+            status: decision,
+            remarks,
+            date: correction.date,
+          },
+          schoolId,
+          sendEmailFlag: true,
+        }).catch((err) => console.warn("[approvals] Notification error:", err.message));
+
+        return { type, id, status: decision, message: `Attendance correction ${decision}.` };
+      } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        throw err;
+      }
+    }
+
     default:
       throw new ApiError(400, `Unknown approval type: ${type}`);
   }
@@ -538,7 +708,7 @@ const bulkDecideItems = async ({ schoolId, approverUser, items = [], decision, r
     throw new ApiError(400, "Maximum 25 items allowed in a single bulk approval.");
   }
 
-  const allowedTypes = ["teacher_leave", "concession", "expense"];
+  const allowedTypes = ["teacher_leave", "concession", "expense", "attendance_correction"];
   const disallowed = items.filter((it) => !allowedTypes.includes(it.type));
   if (disallowed.length > 0) {
     throw new ApiError(

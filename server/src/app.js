@@ -45,6 +45,11 @@ const substitutionRoutes = require("./routes/substitution.routes");
 const incidentRoutes = require("./routes/incident.routes");
 const inquiryRoutes = require("./routes/inquiry.routes");
 const monthlyReportRoutes = require("./routes/monthlyReport.routes");
+const teacherDashboardRoutes = require("./routes/teacherDashboard.routes");
+const homeworkRoutes = require("./routes/homework.routes");
+const studyMaterialRoutes = require("./routes/studyMaterial.routes");
+const studentPortalRoutes = require("./routes/studentPortal.routes");
+const parentPortalRoutes = require("./routes/parentPortal.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -165,6 +170,11 @@ app.use("/api/welfare", welfareRoutes);
 app.use("/api/substitutions", substitutionRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api", inquiryRoutes);
+app.use("/api/teacher", teacherDashboardRoutes);
+app.use("/api/homework", homeworkRoutes);
+app.use("/api/study-materials", studyMaterialRoutes);
+app.use("/api/student", studentPortalRoutes);
+app.use("/api/parent", parentPortalRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
