@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../features/auth/authSlice";
@@ -44,7 +44,7 @@ import {
   Layers,
 } from "lucide-react";
 
-// ── Nav config per role ────────────────────────────────────────────────────
+// â”€â”€ Nav config per role â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const NAV_ITEMS = {
   principal: [
     { icon: LayoutDashboard, label: "Dashboard",            path: "/principal/dashboard" },
@@ -176,7 +176,7 @@ const ROLE_COLORS = {
 };
 
 /**
- * SidebarContent — Stable module-level component so it is never recreated during renders.
+ * SidebarContent â€” Stable module-level component so it is never recreated during renders.
  */
 const SidebarContent = ({
   user,
@@ -361,7 +361,7 @@ const DashboardLayout = () => {
       const handleFeePaidNotification = (data) => {
         if (["admin", "superadmin", "accountant"].includes(user?.role)) {
           toast.success(
-            `💰 Fee Paid: ₹${data.amount?.toLocaleString("en-IN")} received from ${data.studentName} (${data.receiptNumber})`,
+            `ðŸ’° Fee Paid: â‚¹${data.amount?.toLocaleString("en-IN")} received from ${data.studentName} (${data.receiptNumber})`,
             { duration: 6000, position: "bottom-right" }
           );
         }
@@ -485,7 +485,7 @@ const DashboardLayout = () => {
             </button>
             <div className="min-w-0">
               <h1 className="text-base font-semibold text-slate-800 capitalize truncate">
-                {location.pathname.split("/").filter(Boolean).join(" › ")}
+                {location.pathname.split("/").filter(Boolean).join(" â€º ")}
               </h1>
             </div>
           </div>
@@ -517,10 +517,11 @@ const DashboardLayout = () => {
         </main>
       </div>
 
-      {/* AI Chat Widget — available to all roles */}
+      {/* AI Chat Widget â€” available to all roles */}
       <AIChatWidget />
     </div>
   );
 };
 
 export default DashboardLayout;
+

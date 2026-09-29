@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import {
@@ -664,7 +664,7 @@ const MarkAttendance = () => {
               <button
                 type="button"
                 disabled
-                className="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-400 text-sm font-semibold rounded-xl cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-slate-200 text-slate-400 text-sm font-semibold rounded-xl cursor-not-allowed flex items-center gap-2"
               >
                 <ShieldAlert className="w-4 h-4" />
                 Attendance Locked (&gt; 3 Days Old)
@@ -701,3 +701,4 @@ const MarkAttendance = () => {
 };
 
 export default MarkAttendance;
+

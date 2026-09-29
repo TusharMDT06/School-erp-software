@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import {
   getMyHomeworkApi,
   createHomeworkApi,
@@ -305,10 +305,10 @@ const TeacherHomework = () => {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-      {/* ── Top Header ────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Top Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-emerald-600" />
             Homework Management
           </h1>
@@ -326,8 +326,8 @@ const TeacherHomework = () => {
         </button>
       </div>
 
-      {/* ── Filter & Search Toolbar ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+      {/* â”€â”€ Filter & Search Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
           <input
@@ -335,7 +335,7 @@ const TeacherHomework = () => {
             placeholder="Search by title, subject..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
@@ -344,7 +344,7 @@ const TeacherHomework = () => {
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-700"
           >
             <option value="">All My Classes</option>
             {teacherMeta.classes.map((cls) => (
@@ -358,7 +358,7 @@ const TeacherHomework = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-700"
           >
             <option value="">All Statuses</option>
             <option value="published">Published</option>
@@ -367,17 +367,17 @@ const TeacherHomework = () => {
         </div>
       </div>
 
-      {/* ── Homework Cards Grid ────────────────────────────────────────────── */}
+      {/* â”€â”€ Homework Cards Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl"></div>
+            <div key={i} className="h-64 bg-slate-200 rounded-2xl"></div>
           ))}
         </div>
       ) : filteredHomework.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center">
-          <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+        <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-12 text-center">
+          <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-slate-800">
             No Homework Assignments Found
           </h3>
           <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
@@ -401,21 +401,21 @@ const TeacherHomework = () => {
             return (
               <div
                 key={hw._id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   {/* Status & Subject Header */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       {hw.subject}
                     </span>
                     <span
                       className={`text-xs font-bold px-2.5 py-0.5 rounded-full capitalize ${
                         hw.status === "closed"
-                          ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                          ? "bg-slate-100 text-slate-600"
                           : isDuePassed
-                          ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-emerald-100 text-emerald-700"
                       }`}
                     >
                       {hw.status === "closed" ? "Closed" : isDuePassed ? "Past Due" : "Active"}
@@ -424,11 +424,11 @@ const TeacherHomework = () => {
 
                   {/* Title & Class */}
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
+                    <h3 className="text-base font-bold text-slate-900 line-clamp-1">
                       {hw.title}
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Class: <strong>{hw.classId?.className || ""}-{hw.classId?.section || ""}</strong> • Due: {new Date(hw.dueDate).toLocaleDateString("en-IN", {
+                      Class: <strong>{hw.classId?.className || ""}-{hw.classId?.section || ""}</strong> â€¢ Due: {new Date(hw.dueDate).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         hour: "2-digit",
@@ -439,7 +439,7 @@ const TeacherHomework = () => {
 
                   {/* Description Snippet */}
                   {hw.description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                    <p className="text-xs text-slate-600 line-clamp-2">
                       {hw.description}
                     </p>
                   )}
@@ -450,7 +450,7 @@ const TeacherHomework = () => {
                       <span className="text-slate-500">Submission Progress</span>
                       <span className="text-emerald-600">{completionRate}%</span>
                     </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-emerald-500 h-full rounded-full transition-all"
                         style={{ width: `${completionRate}%` }}
@@ -465,10 +465,10 @@ const TeacherHomework = () => {
                 </div>
 
                 {/* Card Action Footer */}
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleOpenSubmissions(hw)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-semibold shadow-sm transition"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-sm transition"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Submissions</span>
@@ -476,7 +476,7 @@ const TeacherHomework = () => {
 
                   <button
                     onClick={() => setNudgeModalHw(hw)}
-                    className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950 rounded-lg transition"
+                    className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
                     title="Send Reminder Nudge"
                   >
                     <BellRing className="w-4 h-4" />
@@ -484,7 +484,7 @@ const TeacherHomework = () => {
 
                   <button
                     onClick={() => handleOpenEdit(hw)}
-                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 rounded-lg transition"
+                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
                     title="Edit Assignment"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -493,7 +493,7 @@ const TeacherHomework = () => {
                   {hw.status !== "closed" ? (
                     <button
                       onClick={() => handleCloseHomework(hw._id)}
-                      className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 rounded-lg transition"
+                      className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                       title="Close Submissions"
                     >
                       <XCircle className="w-4 h-4" />
@@ -501,7 +501,7 @@ const TeacherHomework = () => {
                   ) : (
                     <button
                       onClick={() => handleDeleteHomework(hw._id)}
-                      className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 rounded-lg transition"
+                      className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                       title="Delete Homework"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -514,14 +514,14 @@ const TeacherHomework = () => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── CREATE / EDIT HOMEWORK MODAL ───────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â”€â”€ CREATE / EDIT HOMEWORK MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-xl p-6 shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-xl p-6 shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-lg font-bold text-slate-900">
                 {editingHomework ? "Edit Homework Assignment" : "Assign New Homework"}
               </h2>
               <button
@@ -536,14 +536,14 @@ const TeacherHomework = () => {
               {/* Class & Subject Pickers */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Class & Section *
                   </label>
                   <select
                     value={formData.classId}
                     onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
                     required
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                   >
                     <option value="">Select Class</option>
                     {teacherMeta.classes.map((cls) => (
@@ -555,14 +555,14 @@ const TeacherHomework = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Subject *
                   </label>
                   <select
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     required
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                   >
                     <option value="">Select Subject</option>
                     {teacherMeta.subjects.map((s, idx) => (
@@ -576,7 +576,7 @@ const TeacherHomework = () => {
 
               {/* Title */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Assignment Title *
                 </label>
                 <input
@@ -585,13 +585,13 @@ const TeacherHomework = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Instructions / Description
                 </label>
                 <textarea
@@ -599,14 +599,14 @@ const TeacherHomework = () => {
                   placeholder="Instructions for students..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
               {/* Due Date & Max Marks */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Due Date & Time *
                   </label>
                   <input
@@ -614,12 +614,12 @@ const TeacherHomework = () => {
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                     required
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Max Marks (Optional)
                   </label>
                   <input
@@ -628,7 +628,7 @@ const TeacherHomework = () => {
                     placeholder="e.g. 25"
                     value={formData.maxMarks}
                     onChange={(e) => setFormData({ ...formData, maxMarks: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                   />
                 </div>
               </div>
@@ -636,13 +636,13 @@ const TeacherHomework = () => {
               {/* Submission Type & Allow Late Submission */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Submission Format
                   </label>
                   <select
                     value={formData.submissionType}
                     onChange={(e) => setFormData({ ...formData, submissionType: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                   >
                     <option value="file">File Upload (PDF/Image/Doc)</option>
                     <option value="text">Text Entry</option>
@@ -660,7 +660,7 @@ const TeacherHomework = () => {
                       }
                       className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
                     />
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="text-xs font-semibold text-slate-700">
                       Allow Late Submissions
                     </span>
                   </label>
@@ -669,10 +669,10 @@ const TeacherHomework = () => {
 
               {/* Attachments Dropzone */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Attach Documents / Worksheets (Max 5 files, 10MB each)
                 </label>
-                <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                <div className="border border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition">
                   <input
                     type="file"
                     multiple
@@ -692,7 +692,7 @@ const TeacherHomework = () => {
                     {attachments.map((f, idx) => (
                       <div
                         key={idx}
-                        className="text-xs text-slate-600 dark:text-slate-400 flex items-center justify-between bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md"
+                        className="text-xs text-slate-600 flex items-center justify-between bg-slate-100 px-3 py-1 rounded-md"
                       >
                         <span className="truncate">{f.name}</span>
                         <span className="text-slate-400">({(f.size / 1024).toFixed(0)} KB)</span>
@@ -703,11 +703,11 @@ const TeacherHomework = () => {
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
                 >
                   Cancel
                 </button>
@@ -724,23 +724,23 @@ const TeacherHomework = () => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── SUBMISSIONS DRAWER / MODAL ─────────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â”€â”€ SUBMISSIONS DRAWER / MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {activeSubmissionsHw && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-end">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-3xl h-full shadow-2xl flex flex-col overflow-hidden">
+          <div className="bg-white w-full max-w-3xl h-full shadow-2xl flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
                   {activeSubmissionsHw.subject} Submissions
                 </span>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">
                   {activeSubmissionsHw.title}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Due: {new Date(activeSubmissionsHw.dueDate).toLocaleDateString("en-IN")} • Max Marks: {activeSubmissionsHw.maxMarks || "N/A"}
+                  Due: {new Date(activeSubmissionsHw.dueDate).toLocaleDateString("en-IN")} â€¢ Max Marks: {activeSubmissionsHw.maxMarks || "N/A"}
                 </p>
               </div>
 
@@ -764,7 +764,7 @@ const TeacherHomework = () => {
             </div>
 
             {/* Submissions Tabs */}
-            <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 text-sm font-semibold">
+            <div className="flex border-b border-slate-200 px-5 text-sm font-semibold">
               <button
                 onClick={() => setSubmissionsTab("submitted")}
                 className={`py-3 px-4 border-b-2 transition ${
@@ -802,7 +802,7 @@ const TeacherHomework = () => {
               {submissionsLoading ? (
                 <div className="space-y-3 animate-pulse">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+                    <div key={i} className="h-20 bg-slate-100 rounded-xl" />
                   ))}
                 </div>
               ) : submissionsTab === "submitted" ? (
@@ -815,11 +815,11 @@ const TeacherHomework = () => {
                   submissionsData?.submitted?.map((sub) => (
                     <div
                       key={sub._id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                          <h4 className="font-bold text-sm text-slate-900">
                             {sub.studentId?.name || "Student"}
                           </h4>
                           <span className="text-xs text-slate-400">
@@ -848,7 +848,7 @@ const TeacherHomework = () => {
                                 href={f.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-emerald-600 hover:underline"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-emerald-600 hover:underline"
                               >
                                 <Paperclip className="w-3 h-3" />
                                 <span className="max-w-[120px] truncate">{f.name}</span>
@@ -858,7 +858,7 @@ const TeacherHomework = () => {
                         )}
                         {/* Text submission */}
                         {sub.text && (
-                          <p className="text-xs text-slate-700 dark:text-slate-300 italic bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mt-1">
+                          <p className="text-xs text-slate-700 italic bg-white p-2 rounded-lg border border-slate-200 mt-1">
                             "{sub.text}"
                           </p>
                         )}
@@ -883,11 +883,11 @@ const TeacherHomework = () => {
                   submissionsData?.reviewed?.map((sub) => (
                     <div
                       key={sub._id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                          <h4 className="font-bold text-sm text-slate-900">
                             {sub.studentId?.name || "Student"}
                           </h4>
                           <span className="text-xs text-slate-400">
@@ -904,7 +904,7 @@ const TeacherHomework = () => {
                           )}
                         </div>
 
-                        <div className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-3">
+                        <div className="text-xs text-slate-600 flex items-center gap-3">
                           <span>
                             Marks: <strong>{sub.marks !== null ? sub.marks : "Ungraded"}</strong> / {activeSubmissionsHw.maxMarks || "N/A"}
                           </span>
@@ -922,7 +922,7 @@ const TeacherHomework = () => {
                                 href={f.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-emerald-600 hover:underline"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-emerald-600 hover:underline"
                               >
                                 <Paperclip className="w-3 h-3" />
                                 <span className="max-w-[120px] truncate">{f.name}</span>
@@ -934,7 +934,7 @@ const TeacherHomework = () => {
 
                       <button
                         onClick={() => handleOpenGrading(sub)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg text-xs transition"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition"
                       >
                         Edit Grade
                       </button>
@@ -945,11 +945,11 @@ const TeacherHomework = () => {
                 // 3. NOT SUBMITTED TAB
                 submissionsData?.notSubmitted?.length === 0 ? (
                   <div className="py-12 text-center text-slate-500 text-sm">
-                    All students in this class have submitted! 🎉
+                    All students in this class have submitted! ðŸŽ‰
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900">
                       <span>{submissionsData?.notSubmitted?.length} student(s) haven't submitted.</span>
                       <button
                         onClick={() => setNudgeModalHw(activeSubmissionsHw)}
@@ -959,18 +959,18 @@ const TeacherHomework = () => {
                       </button>
                     </div>
 
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                    <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
                       {submissionsData?.notSubmitted?.map((student) => (
                         <div
                           key={student._id}
-                          className="p-3 bg-white dark:bg-slate-900 flex items-center justify-between text-sm"
+                          className="p-3 bg-white flex items-center justify-between text-sm"
                         >
                           <div>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            <span className="font-semibold text-slate-800">
                               {student.name}
                             </span>
                             <span className="text-xs text-slate-400 ml-2">
-                              Roll #{student.rollNumber || "N/A"} • Adm #{student.admissionNumber || "N/A"}
+                              Roll #{student.rollNumber || "N/A"} â€¢ Adm #{student.admissionNumber || "N/A"}
                             </span>
                           </div>
                           <span className="text-xs font-semibold text-rose-500">Pending</span>
@@ -985,14 +985,14 @@ const TeacherHomework = () => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── GRADING MODAL ──────────────────────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â”€â”€ GRADING MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {gradingSubmission && (
         <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-base text-slate-900">
                 Grade Submission: {gradingSubmission.studentId?.name}
               </h3>
               <button
@@ -1005,7 +1005,7 @@ const TeacherHomework = () => {
 
             <form onSubmit={handleSubmitReview} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Marks Obtained {activeSubmissionsHw?.maxMarks ? `(Max: ${activeSubmissionsHw.maxMarks})` : ""}
                 </label>
                 <input
@@ -1015,12 +1015,12 @@ const TeacherHomework = () => {
                   value={gradeMarks}
                   onChange={(e) => setGradeMarks(e.target.value)}
                   placeholder="e.g. 18"
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Teacher Feedback / Remarks
                 </label>
                 <textarea
@@ -1028,7 +1028,7 @@ const TeacherHomework = () => {
                   value={gradeFeedback}
                   onChange={(e) => setGradeFeedback(e.target.value)}
                   placeholder="Well structured work, please review question 4..."
-                  className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl"
                 />
               </div>
 
@@ -1040,17 +1040,17 @@ const TeacherHomework = () => {
                     onChange={(e) => setRequestResubmit(e.target.checked)}
                     className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4"
                   />
-                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                  <span className="text-xs font-semibold text-amber-700">
                     Request Resubmission (student must revise and re-upload)
                   </span>
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setGradingSubmission(null)}
-                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl"
+                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
                 >
                   Cancel
                 </button>
@@ -1067,18 +1067,18 @@ const TeacherHomework = () => {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── NUDGE CONFIRMATION MODAL ───────────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â”€â”€ NUDGE CONFIRMATION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {nudgeModalHw && (
         <div className="fixed inset-0 z-60 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <span className="p-3 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-xl">
+              <span className="p-3 bg-amber-100 text-amber-600 rounded-xl">
                 <BellRing className="w-6 h-6" />
               </span>
               <div>
-                <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                <h3 className="font-bold text-base text-slate-900">
                   Send Homework Reminder Nudge
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -1087,19 +1087,19 @@ const TeacherHomework = () => {
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-slate-300">
+            <p className="text-sm text-slate-600">
               This will send an instant in-app notification and email reminder to all enrolled students (and their parents) who have not yet submitted this assignment.
             </p>
 
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs text-slate-500">
-              ⚠️ Note: To prevent spam, reminders can only be sent once every 24 hours per assignment.
+            <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-500">
+              âš ï¸ Note: To prevent spam, reminders can only be sent once every 24 hours per assignment.
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3">
               <button
                 type="button"
                 onClick={() => setNudgeModalHw(null)}
-                className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
@@ -1119,3 +1119,4 @@ const TeacherHomework = () => {
 };
 
 export default TeacherHomework;
+
