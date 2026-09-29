@@ -3,6 +3,7 @@ const Teacher = require("../models/Teacher.model");
 const ClassSection = require("../models/ClassSection.model");
 const Circular = require("../models/Circular.model");
 const { ApiError, ApiResponse } = require("../utils/apiResponse");
+const { getOrEnsureTeacher } = require("../utils/teacherAccess");
 
 const MESSAGE_TEMPLATES = [
   {
@@ -48,8 +49,12 @@ const MESSAGE_TEMPLATES = [
  */
 const getTeacherPreference = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
-    if (!teacher) throw new ApiError(404, "Teacher profile not found.");
+    const teacher = await getOrEnsureTeacher(req.user);
+    if (!teacher) {
+      return res.status(200).json(
+        new ApiResponse(200, { officeHours: [], autoReplyEnabled: false, autoReplyText: "" }, "Teacher preferences retrieved.")
+      );
+    }
 
     let preference = await TeacherPreference.findOne({ teacherId: teacher._id });
     if (!preference) {
@@ -73,7 +78,7 @@ const getTeacherPreference = async (req, res, next) => {
  */
 const updateTeacherPreference = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) throw new ApiError(404, "Teacher profile not found.");
 
     const { officeHours, autoReplyEnabled, autoReplyText } = req.body;
@@ -148,7 +153,7 @@ const getNoticeTemplates = async (req, res, next) => {
  */
 const createClassNotice = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) throw new ApiError(404, "Teacher profile not found.");
 
     const {

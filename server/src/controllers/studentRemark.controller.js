@@ -6,6 +6,7 @@ const Incident = require("../models/Incident.model");
 const User = require("../models/User.model");
 const { notify, notifyMany } = require("../services/notification.service");
 const { ApiError, ApiResponse } = require("../utils/apiResponse");
+const { getOrEnsureTeacher } = require("../utils/teacherAccess");
 
 /**
  * POST /api/remarks
@@ -24,7 +25,7 @@ const createRemark = async (req, res, next) => {
       throw new ApiError(404, "Student not found.");
     }
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
       throw new ApiError(403, "Teacher profile not found.");
     }
@@ -84,7 +85,7 @@ const updateRemark = async (req, res, next) => {
       throw new ApiError(404, "Remark not found.");
     }
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher || remark.teacherId.toString() !== teacher._id.toString()) {
       if (!["admin", "principal"].includes(req.user.role)) {
         throw new ApiError(403, "You can only edit remarks you authored.");
@@ -135,7 +136,7 @@ const getStudentRemarks = async (req, res, next) => {
 
     // If teacher, verify authorization to student's class
     if (req.user.role === "teacher") {
-      const teacher = await Teacher.findOne({ userId: req.user._id });
+      const teacher = await getOrEnsureTeacher(req.user);
       if (!teacher) throw new ApiError(403, "Teacher profile not found.");
 
       const classSection = await ClassSection.findById(student.classId);

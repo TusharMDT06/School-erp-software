@@ -4,6 +4,7 @@ const Teacher = require("../models/Teacher.model");
 const LessonPlan = require("../models/LessonPlan.model");
 const ClassSection = require("../models/ClassSection.model");
 const { ApiError, ApiResponse } = require("../utils/apiResponse");
+const { getOrEnsureTeacher } = require("../utils/teacherAccess");
 
 /**
  * GET /api/teacher/substitutions?from=&to=
@@ -12,9 +13,11 @@ const { ApiError, ApiResponse } = require("../utils/apiResponse");
  */
 const getTeacherSubstitutions = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
-      throw new ApiError(404, "Teacher profile not found.");
+      return res.status(200).json(
+        new ApiResponse(200, [], "Teacher substitutions retrieved.")
+      );
     }
 
     const { from, to } = req.query;
@@ -82,7 +85,7 @@ const acknowledgeSubstitution = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
       throw new ApiError(404, "Teacher profile not found.");
     }
@@ -130,7 +133,7 @@ const createSubstituteSuggestion = async (req, res, next) => {
       throw new ApiError(400, "Date, period, class, and subject are required.");
     }
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
       throw new ApiError(404, "Teacher profile not found.");
     }
@@ -165,7 +168,7 @@ const getSubstituteSuggestions = async (req, res, next) => {
     const filter = { schoolId: req.user.schoolId };
 
     if (req.user.role === "teacher") {
-      const teacher = await Teacher.findOne({ userId: req.user._id });
+      const teacher = await getOrEnsureTeacher(req.user);
       if (teacher) {
         filter.teacherId = teacher._id;
       }

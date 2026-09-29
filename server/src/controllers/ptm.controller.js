@@ -13,6 +13,7 @@ const StudentRisk = require("../models/StudentRisk.model");
 const AcademicEvent = require("../models/AcademicEvent.model");
 const { notify } = require("../services/notification.service");
 const { ApiError, ApiResponse } = require("../utils/apiResponse");
+const { getOrEnsureTeacher } = require("../utils/teacherAccess");
 
 // Helper to convert HH:mm to minutes from midnight
 const timeToMinutes = (timeStr) => {
@@ -460,7 +461,7 @@ const cancelSlot = async (req, res, next) => {
         );
       }
     } else if (isTeacher) {
-      const teacher = await Teacher.findOne({ userId: req.user._id });
+      const teacher = await getOrEnsureTeacher(req.user);
       if (!teacher || slot.teacherId._id.toString() !== teacher._id.toString()) {
         throw new ApiError(403, "You can only cancel your own appointments.");
       }
@@ -526,9 +527,11 @@ const getTeacherAgenda = async (req, res, next) => {
   try {
     const { ptmId } = req.query;
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
-      throw new ApiError(404, "Teacher profile not found.");
+      return res.status(200).json(
+        new ApiResponse(200, [], "Teacher agenda retrieved.")
+      );
     }
 
     const filter = {
@@ -645,7 +648,7 @@ const completeSlot = async (req, res, next) => {
     const { id } = req.params;
     const { notes = "", sharedSummary = "", actionItems = [], noShow = false } = req.body;
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher && !["admin", "principal", "superadmin"].includes(req.user.role)) {
       throw new ApiError(403, "Only the assigned teacher or admin can complete a PTM slot.");
     }

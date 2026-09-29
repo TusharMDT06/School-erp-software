@@ -13,6 +13,7 @@ const auditLog = require("../utils/auditLog");
 const { notify } = require("../services/notification.service");
 const { generateContent, parseResponse } = require("../config/geminiClient");
 const { ApiError, ApiResponse } = require("../utils/apiResponse");
+const { getOrEnsureTeacher } = require("../utils/teacherAccess");
 
 let sendWhatsAppMessage = null;
 try {
@@ -32,7 +33,7 @@ try {
  */
 const getMyClass = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) {
       throw new ApiError(404, "Teacher profile not found.");
     }
@@ -43,16 +44,43 @@ const getMyClass = async (req, res, next) => {
     if (classId) {
       targetClass = await ClassSection.findOne({
         _id: classId,
-        classTeacherId: teacher._id,
+        ...(teacher ? { classTeacherId: teacher._id } : {}),
       });
+      if (!targetClass && ["admin", "principal", "superadmin"].includes(req.user.role)) {
+        targetClass = await ClassSection.findById(classId);
+      }
       if (!targetClass) {
         throw new ApiError(403, "You are not designated as the Class Teacher for this class.");
       }
     } else {
-      targetClass = await ClassSection.findOne({ classTeacherId: teacher._id });
-      if (!targetClass) {
-        throw new ApiError(403, "You are not designated as a Class Teacher for any class.");
+      if (teacher) {
+        targetClass = await ClassSection.findOne({ classTeacherId: teacher._id });
       }
+      if (!targetClass && ["admin", "principal", "superadmin"].includes(req.user.role)) {
+        targetClass =
+          (await ClassSection.findOne({ schoolId: req.user.schoolId })) ||
+          (await ClassSection.findOne());
+      }
+    }
+
+    if (!targetClass) {
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            classInfo: null,
+            stats: {
+              totalEnrolled: 0,
+              averageAttendance: 0,
+              atRiskCount: 0,
+              homeworkAvg: 0,
+            },
+            students: [],
+            message: "You are not currently designated as the Class Teacher for an active class.",
+          },
+          "Class teacher roster retrieved."
+        )
+      );
     }
 
     // Retrieve all active students in this class
@@ -164,7 +192,7 @@ const getMyClass = async (req, res, next) => {
  */
 const previewAbsenteeMessage = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) throw new ApiError(404, "Teacher profile not found.");
 
     const { classId, date, templateKey = "standard", customNote = "" } = req.query;
@@ -231,7 +259,7 @@ const previewAbsenteeMessage = async (req, res, next) => {
  */
 const sendAbsenteeMessage = async (req, res, next) => {
   try {
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) throw new ApiError(404, "Teacher profile not found.");
 
     const {
@@ -375,7 +403,7 @@ const draftReportRemarks = async (req, res, next) => {
     const exam = await Exam.findById(examId);
     if (!exam) throw new ApiError(404, "Exam not found.");
 
-    const teacher = await Teacher.findOne({ userId: req.user._id });
+    const teacher = await getOrEnsureTeacher(req.user);
     if (!teacher) throw new ApiError(404, "Teacher profile not found.");
 
     // Process students in batches of 5

@@ -3,6 +3,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const { authorizeRoles } = require("../middlewares/role.middleware");
 const {
   createExam,
+  getExams,
   getExamsByClass,
   getExamById,
   updateExam,
@@ -14,6 +15,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // ── Exam Configuration ─────────────────────────────────────────────────────
+router.get("/", getExams);
 router.post("/", authorizeRoles("admin", "superadmin", "principal"), createExam);
 router.get("/class/:classId", getExamsByClass);
 router.get("/:id", getExamById);

@@ -370,7 +370,7 @@ const DashboardLayout = () => {
       const handleFeePaidNotification = (data) => {
         if (["admin", "superadmin", "accountant"].includes(user?.role)) {
           toast.success(
-            `ðŸ’° Fee Paid: â‚¹${data.amount?.toLocaleString("en-IN")} received from ${data.studentName} (${data.receiptNumber})`,
+            `💰 Fee Paid: ₹${data.amount?.toLocaleString("en-IN")} received from ${data.studentName} (${data.receiptNumber})`,
             { duration: 6000, position: "bottom-right" }
           );
         }
@@ -494,7 +494,7 @@ const DashboardLayout = () => {
             </button>
             <div className="min-w-0">
               <h1 className="text-base font-semibold text-slate-800 capitalize truncate">
-                {location.pathname.split("/").filter(Boolean).join(" â€º ")}
+                {location.pathname.split("/").filter(Boolean).join(" › ")}
               </h1>
             </div>
           </div>

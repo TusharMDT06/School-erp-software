@@ -28,6 +28,7 @@ const authMiddleware = (req, res, next) => {
     // Attach only what downstream middleware/controllers need
     req.user = {
       id: decoded.id,
+      _id: decoded.id,
       role: decoded.role,
       schoolId: decoded.schoolId,
     };

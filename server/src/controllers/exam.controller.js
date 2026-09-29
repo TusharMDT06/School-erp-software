@@ -143,8 +143,31 @@ const deleteExam = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/exams
+ * Lists all exams with optional filters (classId, academicYear).
+ */
+const getExams = async (req, res, next) => {
+  try {
+    const { classId, academicYear } = req.query;
+    const filter = {};
+    if (req.user?.schoolId) filter.schoolId = req.user.schoolId;
+    if (classId) filter.classId = classId;
+    if (academicYear) filter.academicYear = academicYear;
+
+    const exams = await Exam.find(filter)
+      .populate("classId", "className section academicYear")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(new ApiResponse(200, exams, "Examinations retrieved."));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createExam,
+  getExams,
   getExamsByClass,
   getExamById,
   updateExam,
