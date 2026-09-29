@@ -7,10 +7,11 @@ const { getMorningBrief, refreshMorningBrief } = require("../controllers/morning
 const router = express.Router();
 
 router.use(authMiddleware);
-router.use(authorizeRoles("principal", "admin", "superadmin"));
 
-router.get("/dashboard", getPrincipalDashboard);
-router.get("/morning-brief", getMorningBrief);
-router.post("/morning-brief/refresh", refreshMorningBrief);
+const canAccess = authorizeRoles("principal", "admin", "superadmin");
+
+router.get("/dashboard", canAccess, getPrincipalDashboard);
+router.get("/morning-brief", canAccess, getMorningBrief);
+router.post("/morning-brief/refresh", canAccess, refreshMorningBrief);
 
 module.exports = router;

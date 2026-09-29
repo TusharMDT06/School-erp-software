@@ -157,14 +157,14 @@ app.use("/api/audit-logs", auditLogRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/circulars", circularRoutes);
 app.use("/api/approvals", approvalRoutes);
-app.use("/api/principal", principalRoutes);
 app.use("/api/principal/academics", academicsRoutes);
 app.use("/api/principal/staff", staffRoutes);
+app.use("/api/principal/reports", monthlyReportRoutes);
+app.use("/api/principal", principalRoutes);
 app.use("/api/welfare", welfareRoutes);
 app.use("/api/substitutions", substitutionRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api", inquiryRoutes);
-app.use("/api/principal/reports", monthlyReportRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
