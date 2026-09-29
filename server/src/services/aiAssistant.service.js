@@ -2,6 +2,7 @@ const { generateContent, parseResponse } = require("../config/geminiClient");
 const ChatConversation = require("../models/ChatConversation.model");
 const Student = require("../models/Student.model");
 const Teacher = require("../models/Teacher.model");
+const auditLog = require("../utils/auditLog");
 
 const { adminToolDeclarations, adminToolHandlers } = require("./aiTools/adminTools");
 const { teacherToolDeclarations, teacherToolHandlers } = require("./aiTools/teacherTools");
@@ -167,6 +168,17 @@ async function processChat(userId, role, schoolId, userMessage) {
       for (const part of functionCalls) {
         const { name, args } = part.functionCall;
         const result = await executeTool(name, args || {}, roleConfig.handlers, userContext);
+
+        // Record AI assistant tool call with module "ai_assist"
+        await auditLog({
+          schoolId: userContext.schoolId,
+          userId: userContext.userId,
+          action: name,
+          module: "ai_assist",
+          targetId: userContext.teacherRecord?._id || userContext.userId,
+          newValue: { toolName: name, role },
+        });
+
         toolResultParts.push({
           functionResponse: { name, response: { result } },
         });

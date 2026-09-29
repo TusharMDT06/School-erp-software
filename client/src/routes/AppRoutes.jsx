@@ -58,6 +58,15 @@ import TakeQuiz from "../pages/student/TakeQuiz";
 import QuizResultView from "../pages/student/QuizResultView";
 import StudentGradebook from "../pages/student/StudentGradebook";
 
+// ── Phase 9C: PTM, Remarks, Substitutions, My Class, Communication ───────────
+import MyClass from "../pages/teacher/MyClass";
+import PTMAgenda from "../pages/teacher/PTMAgenda";
+import Remarks from "../pages/teacher/Remarks";
+import Substitutions from "../pages/teacher/Substitutions";
+import CommunicationSettings from "../pages/teacher/CommunicationSettings";
+import PTMBooking from "../pages/parent/PTMBooking";
+import ChildRemarks from "../pages/parent/ChildRemarks";
+
 // ── Phase 4: Fee & Finance Pages ──────────────────────────────────────────────
 import FeeStructureSetup from "../pages/admin/Fees/FeeStructureSetup";
 import DefaulterList from "../pages/admin/Fees/DefaulterList";
@@ -243,6 +252,12 @@ const AppRoutes = () => {
           <Route path="/teacher/academics" element={<Academics />} />
           <Route path="/teacher/welfare" element={<StudentWelfare />} />
           <Route path="/teacher/incidents" element={<Incidents />} />
+          {/* Phase 9C: Teacher Class Tools, PTM, Remarks, Substitutions, Communication */}
+          <Route path="/teacher/my-class" element={<MyClass />} />
+          <Route path="/teacher/ptm" element={<PTMAgenda />} />
+          <Route path="/teacher/remarks" element={<Remarks />} />
+          <Route path="/teacher/substitutions" element={<Substitutions />} />
+          <Route path="/teacher/communication" element={<CommunicationSettings />} />
         </Route>
       </Route>
 
@@ -272,6 +287,9 @@ const AppRoutes = () => {
           <Route path="/parent/homework" element={<ChildHomework />} />
           <Route path="/parent/fees" element={<PayFees />} />
           <Route path="/parent/results" element={<ChildResults />} />
+          {/* Phase 9C: Parent PTM Booking and Remarks */}
+          <Route path="/parent/ptm" element={<PTMBooking />} />
+          <Route path="/parent/remarks" element={<ChildRemarks />} />
         </Route>
       </Route>
 

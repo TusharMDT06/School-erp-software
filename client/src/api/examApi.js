@@ -44,3 +44,13 @@ export const deleteExamApi = async (id) => {
   const response = await axiosInstance.delete(`/exams/${id}`);
   return response.data;
 };
+
+/**
+ * GET /exams
+ * Fetches all exams with optional filters.
+ */
+export const getExamsApi = async (params = {}) => {
+  const response = await axiosInstance.get("/exams", { params });
+  return response.data;
+};
+

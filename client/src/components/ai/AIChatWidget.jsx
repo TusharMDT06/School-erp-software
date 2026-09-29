@@ -101,10 +101,10 @@ const SUGGESTED_PROMPTS = {
     "Show fee defaulters",
   ],
   teacher: [
-    "Show my assigned classes",
-    "List my students",
-    "Attendance summary this month",
-    "Student results overview",
+    "What do I need to do today?",
+    "Who hasn't submitted homework?",
+    "Which students need attention in my class?",
+    "Am I behind on syllabus?",
   ],
   student: [
     "Show my attendance",

@@ -3,6 +3,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const { authorizeRoles } = require("../middlewares/role.middleware");
 const { getChildHomework } = require("../controllers/homework.controller");
 const { getParentGradebook } = require("../controllers/gradebook.controller");
+const { getParentRemarks } = require("../controllers/studentRemark.controller");
 
 const router = express.Router();
 
@@ -25,6 +26,13 @@ router.get(
   },
   authorizeRoles("parent", "admin", "superadmin"),
   getParentGradebook
+);
+
+// ── Parent Child Remarks Endpoint (Phase 9C) ──────────────────────────────
+router.get(
+  "/children/:id/remarks",
+  authorizeRoles("parent", "admin", "superadmin"),
+  getParentRemarks
 );
 
 module.exports = router;

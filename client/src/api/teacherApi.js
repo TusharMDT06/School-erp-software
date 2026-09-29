@@ -29,3 +29,9 @@ export const deleteTeacherApi = async (id) => {
   const response = await axiosInstance.delete(`/teachers/${id}`);
   return response.data;
 };
+
+export const getTeacherClassesAndSubjectsApi = async () => {
+  const response = await axiosInstance.get("/teacher/classes-subjects");
+  return response.data;
+};
+
