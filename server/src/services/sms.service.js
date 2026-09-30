@@ -13,6 +13,17 @@ const formatPhoneNumber = (phone) => {
   if (!cleaned.startsWith("+")) {
     cleaned = `+91${cleaned.replace(/^0+/, "")}`;
   }
+
+  // Handle dummy seed numbers (e.g. +919988776655, +919988776656).
+  // On Twilio Free Trial accounts, calls can only be placed to verified caller IDs.
+  // Redirecting dummy numbers ensures tests and demos ring the developer/admin's verified phone.
+  const dummyNumbers = ["+919988776655", "+919988776656", "+911234567890", "+910000000000"];
+  if (dummyNumbers.includes(cleaned) || cleaned.startsWith("+9199887")) {
+    const verifiedPhone = process.env.DEMO_PARENT_PHONE || "+919027805934";
+    console.log(`🔀 [PhoneFormat] Mapping dummy seed phone ${cleaned} -> verified trial phone: ${verifiedPhone}`);
+    return verifiedPhone;
+  }
+
   return cleaned;
 };
 

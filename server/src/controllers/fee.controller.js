@@ -516,14 +516,36 @@ const triggerFeeOverdueCallAlert = async (req, res, next) => {
       contextData: {
         amountDue: remainingAmount,
         dueDate: tx.feeStructureId?.dueDate,
+        schoolId: tx.feeStructureId?.schoolId,
       },
+      force: true, // Manual admin click: bypass quiet hours and de-duplication
     });
+
+    if (!callLog) {
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          null,
+          "Call alert could not be dispatched at this time."
+        )
+      );
+    }
+
+    if (callLog.callStatus === "failed") {
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          callLog,
+          `Call to ${callLog.recipientPhone} failed. SMS & WhatsApp fallback triggered.`
+        )
+      );
+    }
 
     res.status(200).json(
       new ApiResponse(
         200,
         callLog,
-        "Automated voice call alert dispatched. Will fallback to SMS & WhatsApp if unanswered."
+        `Automated voice call alert dispatched to ${callLog.recipientPhone}. Phone will ring shortly.`
       )
     );
   } catch (error) {

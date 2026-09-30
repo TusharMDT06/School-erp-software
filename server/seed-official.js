@@ -185,7 +185,7 @@ const seedOfficialSchool = async () => {
       password: "Password@123",
       role: "parent",
       schoolId: officialSchool._id,
-      phone: "+91 99887 76655",
+      phone: process.env.DEMO_PARENT_PHONE || "+919027805934",
       isActive: true,
     });
 
@@ -195,7 +195,7 @@ const seedOfficialSchool = async () => {
       password: "Password@123",
       role: "parent",
       schoolId: officialSchool._id,
-      phone: "+91 99887 76656",
+      phone: process.env.DEMO_PARENT_PHONE || "+919027805934",
       isActive: true,
     });
 

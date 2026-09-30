@@ -66,7 +66,12 @@ async function makeCall({ parentUserId, parentPhone, message, reason, relatedEnt
     return failedLog;
   }
 
-  const serverUrl = (process.env.SERVER_URL || "").replace(/\/$/, "");
+  let serverUrl = (process.env.SERVER_URL || "").replace(/\/$/, "");
+  // Twilio requires a public HTTPS URL to fetch TwiML. If SERVER_URL is missing or localhost, fallback to deployed backend:
+  if (!serverUrl || serverUrl.includes("localhost") || serverUrl.includes("127.0.0.1")) {
+    serverUrl = "https://school-erp-software-qdtx.onrender.com";
+  }
+
   const statusCallbackUrl = serverUrl
     ? `${serverUrl}/api/webhooks/twilio/call-status`
     : undefined;
@@ -86,6 +91,10 @@ async function makeCall({ parentUserId, parentPhone, message, reason, relatedEnt
       from: process.env.TWILIO_PHONE_NUMBER,
       url: twimlUrl,
     };
+
+    if (statusCallbackUrl && statusCallbackUrl.startsWith("https://")) {
+      callOptions.statusCallback = statusCallbackUrl;
+    }
 
     const call = await twilioClient.calls.create(callOptions);
 

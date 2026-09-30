@@ -238,7 +238,7 @@ const seedDatabase = async () => {
       password: "Password@123",
       role: "parent",
       schoolId: school._id,
-      phone: "+91 99887 76655",
+      phone: process.env.DEMO_PARENT_PHONE || "+919027805934",
       profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093364/school_erp/profiles/parent_suresh.jpg",
       isActive: true,
     });
@@ -249,7 +249,7 @@ const seedDatabase = async () => {
       password: "Password@123",
       role: "parent",
       schoolId: school._id,
-      phone: "+91 99887 76656",
+      phone: process.env.DEMO_PARENT_PHONE || "+919027805934",
       profileImage: "https://res.cloudinary.com/yiuiauvg/image/upload/v1790093365/school_erp/profiles/parent_meenakshi.jpg",
       isActive: true,
     });
