@@ -63,8 +63,14 @@ export default function Circulars() {
   useEffect(() => {
     loadCirculars();
     getClassesApi({ limit: 100 })
-      .then((res) => setClassesList(res.data?.classes || res.data || []))
-      .catch(() => {});
+      .then((res) => {
+        const raw =
+          res?.data?.data ||
+          res?.data?.classes ||
+          (Array.isArray(res?.data) ? res.data : []);
+        setClassesList(Array.isArray(raw) ? raw : []);
+      })
+      .catch(() => setClassesList([]));
   }, [loadCirculars]);
 
   const openComposer = () => {
@@ -362,14 +368,15 @@ export default function Circulars() {
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Target Classes (Optional — Leave blank for all classes)</label>
                 <div className="max-h-24 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1">
-                  {classesList.map((c) => (
+                  {(Array.isArray(classesList) ? classesList : []).map((c) => (
                     <label key={c._id} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={form.classIds.includes(c._id)}
+                        checked={(Array.isArray(form?.classIds) ? form.classIds : []).includes(c._id)}
                         onChange={(e) => {
-                          if (e.target.checked) setForm({ ...form, classIds: [...form.classIds, c._id] });
-                          else setForm({ ...form, classIds: form.classIds.filter((id) => id !== c._id) });
+                          const current = Array.isArray(form?.classIds) ? form.classIds : [];
+                          if (e.target.checked) setForm({ ...form, classIds: [...current, c._id] });
+                          else setForm({ ...form, classIds: current.filter((id) => id !== c._id) });
                         }}
                       />
                       <span>{c.className} - {c.section}</span>
@@ -407,7 +414,7 @@ export default function Circulars() {
               {/* Attachments */}
               <div className="space-y-2">
                 <label className="block font-bold text-slate-700">Attachments</label>
-                {form.attachments.map((att, i) => (
+                {(Array.isArray(form?.attachments) ? form.attachments : []).map((att, i) => (
                   <div key={i} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
                     <span className="font-medium text-slate-700">{att.name} ({att.url})</span>
                     <button type="button" onClick={() => handleRemoveAttachment(i)} className="text-rose-600">

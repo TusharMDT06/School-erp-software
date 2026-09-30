@@ -103,6 +103,7 @@ const listClasses = async (req, res, next) => {
         200,
         {
           data,
+          classes: data,
           page: parseInt(page),
           totalPages: Math.ceil(total / parseInt(limit)),
           totalCount: total,

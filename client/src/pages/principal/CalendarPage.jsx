@@ -100,8 +100,14 @@ export default function CalendarPage() {
   useEffect(() => {
     if (isPrivileged) {
       getClassesApi({ limit: 100 })
-        .then((res) => setClassesList(res.data?.classes || res.data || []))
-        .catch(() => {});
+        .then((res) => {
+          const raw =
+            res?.data?.data ||
+            res?.data?.classes ||
+            (Array.isArray(res?.data) ? res.data : []);
+          setClassesList(Array.isArray(raw) ? raw : []);
+        })
+        .catch(() => setClassesList([]));
     }
   }, [isPrivileged]);
 
@@ -604,14 +610,15 @@ export default function CalendarPage() {
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">Select Applicable Classes</label>
                   <div className="max-h-28 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1">
-                    {classesList.map((c) => (
+                    {(Array.isArray(classesList) ? classesList : []).map((c) => (
                       <label key={c._id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={form.classIds.includes(c._id)}
+                          checked={(Array.isArray(form?.classIds) ? form.classIds : []).includes(c._id)}
                           onChange={(e) => {
-                            if (e.target.checked) setForm({ ...form, classIds: [...form.classIds, c._id] });
-                            else setForm({ ...form, classIds: form.classIds.filter((id) => id !== c._id) });
+                            const current = Array.isArray(form?.classIds) ? form.classIds : [];
+                            if (e.target.checked) setForm({ ...form, classIds: [...current, c._id] });
+                            else setForm({ ...form, classIds: current.filter((id) => id !== c._id) });
                           }}
                         />
                         <span>{c.className} - {c.section}</span>
