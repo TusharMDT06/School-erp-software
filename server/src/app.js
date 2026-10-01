@@ -58,6 +58,7 @@ const ptmRoutes = require("./routes/ptm.routes");
 const studentRemarkRoutes = require("./routes/studentRemark.routes");
 const teacherPortalExtraRoutes = require("./routes/teacherPortalExtra.routes");
 const communicationRoutes = require("./routes/communication.routes");
+const notificationRoutes = require("./routes/notification.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -191,6 +192,7 @@ app.use("/api/ptm", ptmRoutes);
 app.use("/api/remarks", studentRemarkRoutes);
 app.use("/api/teacher", teacherPortalExtraRoutes);
 app.use("/api/communication", communicationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
