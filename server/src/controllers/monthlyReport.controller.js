@@ -616,7 +616,8 @@ exports.generateMonthlyReport = async (req, res) => {
 exports.listReports = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
-    const reports = await MonthlyReport.find({ schoolId })
+    const filter = req.user.role === "superadmin" && !schoolId ? {} : schoolId ? { schoolId } : {};
+    const reports = await MonthlyReport.find(filter)
       .populate("generatedBy", "name email role")
       .sort({ year: -1, month: -1 })
       .lean();
@@ -633,25 +634,65 @@ exports.downloadReport = async (req, res) => {
     const schoolId = req.user.schoolId;
     const { format = "pdf" } = req.query;
 
-    const report = await MonthlyReport.findOne({ _id: req.params.id, schoolId });
+    const query = { _id: req.params.id };
+    if (req.user.role !== "superadmin" && schoolId) {
+      query.schoolId = schoolId;
+    }
+
+    const report = await MonthlyReport.findOne(query);
     if (!report) {
       return res.status(404).json({ success: false, message: "Report not found." });
     }
 
-    const relUrl = format === "excel" ? report.excelUrl : report.pdfUrl;
-    if (!relUrl) {
-      return res.status(404).json({ success: false, message: "Requested file format not found." });
-    }
-
-    const absPath = path.join(__dirname, "../..", relUrl);
-    if (!fs.existsSync(absPath)) {
-      return res.status(404).json({ success: false, message: "Physical report file not found on server." });
-    }
-
     const ext = format === "excel" ? "xlsx" : "pdf";
     const downloadName = `MIS_Report_${report.month}_${report.year}.${ext}`;
+    const relUrl = format === "excel" ? report.excelUrl : report.pdfUrl;
+
+    let absPath = relUrl ? path.join(__dirname, "../..", relUrl) : null;
+
+    // Ephemeral filesystem fallback: If the physical file does not exist on disk
+    // (e.g. Render container redeployed/restarted), dynamically regenerate it from the stored snapshot!
+    if (!absPath || !fs.existsSync(absPath)) {
+      console.log(`📄 [MonthlyReport] Physical file missing for report ${report._id}, dynamically regenerating ${ext}...`);
+
+      if (!fs.existsSync(REPORTS_DIR)) {
+        fs.mkdirSync(REPORTS_DIR, { recursive: true });
+      }
+
+      const school = (await School.findById(report.schoolId).lean()) || { name: "School ERP Institution" };
+      const snapshot = report.dataSnapshot || (await computeMonthlySnapshot(report.schoolId, report.month, report.year));
+      const summaryText = report.summaryText || (await generateExecutiveSummary(snapshot, school.name));
+
+      const pdfFilename = `MIS_${report.schoolId}_${report.year}_${report.month}.pdf`;
+      const excelFilename = `MIS_${report.schoolId}_${report.year}_${report.month}.xlsx`;
+
+      const targetPdfPath = path.join(REPORTS_DIR, pdfFilename);
+      const targetExcelPath = path.join(REPORTS_DIR, excelFilename);
+
+      if (format === "excel") {
+        await buildExcelReport(snapshot, school, targetExcelPath);
+        absPath = targetExcelPath;
+        report.excelUrl = `/uploads/reports/${excelFilename}`;
+      } else {
+        await buildPdfReport(snapshot, school, summaryText, targetPdfPath);
+        absPath = targetPdfPath;
+        report.pdfUrl = `/uploads/reports/${pdfFilename}`;
+      }
+
+      await report.save().catch(() => {});
+    }
+
+    res.setHeader("Content-Disposition", `attachment; filename="${downloadName}"`);
+    res.setHeader(
+      "Content-Type",
+      format === "excel"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/pdf"
+    );
+
     return res.download(absPath, downloadName);
   } catch (err) {
+    console.error("[downloadReport Error]", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

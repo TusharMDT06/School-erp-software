@@ -101,7 +101,10 @@ export default function Reports() {
     try {
       toast.loading(`Preparing ${format.toUpperCase()} download...`, { id: "dl" });
       const res = await downloadReportApi(reportId, format);
-      const blob = new Blob([res.data]);
+      const mimeType = format === "excel"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/pdf";
+      const blob = new Blob([res.data], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -109,9 +112,20 @@ export default function Reports() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       toast.success("Download started!", { id: "dl" });
     } catch (err) {
-      toast.error("Failed to download file.", { id: "dl" });
+      let errMsg = "Failed to download file.";
+      if (err?.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          if (parsed.message) errMsg = parsed.message;
+        } catch {}
+      } else if (err?.response?.data?.message) {
+        errMsg = err.response.data.message;
+      }
+      toast.error(errMsg, { id: "dl" });
     }
   };
 
