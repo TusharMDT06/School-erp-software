@@ -28,16 +28,60 @@ setInterval(() => {
 }, 60000).unref();
 
 /**
+ * Automatically sanitizes and normalizes Redis connection URLs.
+ * Handles common copy-paste errors:
+ * - Quotes: "rediss://..." or 'rediss://...'
+ * - CLI prefixes: "redis-cli -u rediss://..."
+ * - Missing protocol: "endpoint.upstash.io:6379" -> "rediss://endpoint.upstash.io:6379"
+ * - Accidental REST API URLs (warns user)
+ */
+const sanitizeRedisUrl = (rawUrl) => {
+  if (!rawUrl || typeof rawUrl !== "string") return null;
+  let cleaned = rawUrl.trim();
+
+  // Strip wrapping quotes
+  cleaned = cleaned.replace(/^["']+|["']+$/g, "").trim();
+
+  // Strip CLI prefixes like "redis-cli -u " or "redis-cli --tls -u "
+  cleaned = cleaned.replace(/^redis-cli\s+(--tls\s+)?(-u\s+)?/i, "").trim();
+
+  // Strip wrapping quotes again if wrapped inside CLI command
+  cleaned = cleaned.replace(/^["']+|["']+$/g, "").trim();
+
+  if (!cleaned) return null;
+
+  // Detect accidental REST API URL from Upstash
+  if (cleaned.startsWith("https://") || cleaned.startsWith("http://")) {
+    console.warn("⚠️ [Redis] Found HTTP(S) REST URL. Redis client requires a TCP connection string (starting with 'rediss://' or 'redis://'). Falling back to In-Memory cache.");
+    return null;
+  }
+
+  // Prepend protocol if missing
+  if (!cleaned.startsWith("redis://") && !cleaned.startsWith("rediss://")) {
+    cleaned = `rediss://${cleaned}`;
+  }
+
+  return cleaned;
+};
+
+/**
  * Initializes the Redis connection.
  * Falls back seamlessly to In-Memory cache if REDIS_URL is not set or unreachable.
  */
 const initRedis = async () => {
   if (client && isConnected) return client;
 
-  const redisUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL;
+  const rawUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL;
 
-  if (!redisUrl) {
+  if (!rawUrl) {
     console.log("ℹ️ [Cache Engine] REDIS_URL not configured — running with High-Speed In-Memory Cache Fallback.");
+    isConnected = false;
+    return null;
+  }
+
+  const redisUrl = sanitizeRedisUrl(rawUrl);
+  if (!redisUrl) {
+    console.log("ℹ️ [Cache Engine] Invalid or unparseable REDIS_URL — running with High-Speed In-Memory Cache Fallback.");
     isConnected = false;
     return null;
   }
