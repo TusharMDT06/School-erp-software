@@ -14,17 +14,23 @@ const {
   remindNonResponders,
 } = require("../controllers/circular.controller");
 
+const { cacheMiddleware } = require("../middlewares/cache.middleware");
+
 const router = express.Router();
 
 router.use(authMiddleware);
 
 // User-specific circular inbox (must be before /:id)
-router.get("/mine", getMyCirculars);
+router.get("/mine", cacheMiddleware({ ttl: 60, prefix: "circulars:mine" }), getMyCirculars);
 
 // Principal & Admin Circular CRUD
 router
   .route("/")
-  .get(authorizeRoles("principal", "admin", "superadmin"), getCirculars)
+  .get(
+    authorizeRoles("principal", "admin", "superadmin"),
+    cacheMiddleware({ ttl: 60, prefix: "circulars:list" }),
+    getCirculars
+  )
   .post(authorizeRoles("principal", "admin", "superadmin"), createCircular);
 
 // Publish circular

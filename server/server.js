@@ -2,6 +2,7 @@ require("dotenv").config();
 const http = require("http");
 const app = require("./src/app");
 const connectDB = require("./src/config/db");
+const { initRedis } = require("./src/config/redis");
 const { initSocket } = require("./src/config/socket");
 const initFeeReminderJob = require("./src/jobs/feeReminder.job");
 const { initCallFallbackJob } = require("./src/jobs/callFallbackCheck.job");
@@ -36,6 +37,7 @@ const PORT = process.env.PORT || 5000;
  */
 const startServer = async () => {
   await connectDB();
+  await initRedis();
 
   const server = http.createServer(app);
   initSocket(server);

@@ -11,6 +11,8 @@ const {
   cancelEvent,
 } = require("../controllers/calendar.controller");
 
+const { cacheMiddleware } = require("../middlewares/cache.middleware");
+
 const router = express.Router();
 
 router.use(authMiddleware);
@@ -18,7 +20,7 @@ router.use(authMiddleware);
 // Event read (all authenticated roles) & creation (principal, admin, superadmin)
 router
   .route("/events")
-  .get(getEvents)
+  .get(cacheMiddleware({ ttl: 120, prefix: "calendar:events" }), getEvents)
   .post(authorizeRoles("principal", "admin", "superadmin"), createEvent);
 
 // Audience Preview before publish

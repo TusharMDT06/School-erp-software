@@ -12,6 +12,7 @@ const sendFeeReminder = require("../utils/sendFeeReminder");
 const { sendParentAlert } = require("../services/parentAlert.service");
 const { getIO } = require("../config/socket");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
+const { clearCachePattern } = require("../config/redis");
 
 /**
  * POST /api/fees/structure
@@ -57,6 +58,9 @@ const createFeeStructure = async (req, res, next) => {
 
       createdTransactions = await FeeTransaction.insertMany(transactionDocs);
     }
+
+    clearCachePattern("fees:*").catch(() => {});
+    clearCachePattern("dashboard:*").catch(() => {});
 
     res.status(201).json(
       new ApiResponse(
@@ -308,6 +312,9 @@ const verifyRazorpayPayment = async (req, res, next) => {
         paidOn: transaction.paidOn,
       });
     }
+
+    clearCachePattern("fees:*").catch(() => {});
+    clearCachePattern("dashboard:*").catch(() => {});
 
     res.status(200).json(
       new ApiResponse(

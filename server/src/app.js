@@ -132,9 +132,25 @@ app.use(cookieParser());
 // ─── Static file serving (uploaded documents, PDF receipts, and report cards)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// ─── Health Check ──────────────────────────────────────────────────────────
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ success: true, message: "Server is running." });
+// ─── Health & Cache Status Check ───────────────────────────────────────────
+const { getCacheHealth } = require("./config/redis");
+
+app.get("/api/health", async (req, res) => {
+  const cacheStatus = await getCacheHealth();
+  res.status(200).json({
+    success: true,
+    message: "Server is running.",
+    cache: cacheStatus,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get("/api/health/cache", async (req, res) => {
+  const cacheStatus = await getCacheHealth();
+  res.status(200).json({
+    success: true,
+    cache: cacheStatus,
+  });
 });
 
 // ─── API Routes ────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ const { z } = require("zod");
 const ClassSection = require("../models/ClassSection.model");
 const Student = require("../models/Student.model");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
+const { clearCachePattern } = require("../config/redis");
 
 // ─── Zod Schemas ────────────────────────────────────────────────────────────
 
@@ -42,6 +43,10 @@ const createClass = async (req, res, next) => {
       academicYear,
       classTeacherId: classTeacherId || null,
     });
+
+    // Invalidate caches
+    clearCachePattern("classes:*").catch(() => {});
+    clearCachePattern("dashboard:*").catch(() => {});
 
     return res
       .status(201)
@@ -167,6 +172,10 @@ const updateClass = async (req, res, next) => {
       throw new ApiError(404, "Class not found.");
     }
 
+    // Invalidate caches
+    clearCachePattern("classes:*").catch(() => {});
+    clearCachePattern("dashboard:*").catch(() => {});
+
     return res
       .status(200)
       .json(new ApiResponse(200, classSection, "Class updated successfully."));
@@ -196,6 +205,10 @@ const deleteClass = async (req, res, next) => {
     if (!classSection) {
       throw new ApiError(404, "Class not found.");
     }
+
+    // Invalidate caches
+    clearCachePattern("classes:*").catch(() => {});
+    clearCachePattern("dashboard:*").catch(() => {});
 
     return res
       .status(200)

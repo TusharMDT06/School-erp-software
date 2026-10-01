@@ -13,6 +13,8 @@ const {
   triggerFeeOverdueCallAlert,
 } = require("../controllers/fee.controller");
 
+const { cacheMiddleware } = require("../middlewares/cache.middleware");
+
 const router = express.Router();
 
 // All fee routes require authentication
@@ -28,6 +30,7 @@ router.post(
 router.get(
   "/structure/:classId",
   authorizeRoles("admin", "superadmin", "accountant"),
+  cacheMiddleware({ ttl: 180, prefix: "fees:structure" }),
   getFeeStructuresByClass
 );
 
