@@ -111,6 +111,7 @@ const recordAuthAuditLog = async ({
   status = "SUCCESS",
   details,
   ip: customIp,
+  photo,
 } = {}) => {
   try {
     if (!AuditLog) return;
@@ -119,7 +120,7 @@ const recordAuthAuditLog = async ({
     const { device, deviceType, browser, os } = parseUserAgent(ua);
     const ip = customIp || getClientIp(req);
 
-    await AuditLog.create({
+    const logEntry = await AuditLog.create({
       schoolId: schoolId || undefined,
       userId: userId || undefined,
       userName: userName || (userRole ? `${userRole} user` : "Unknown"),
@@ -134,7 +135,9 @@ const recordAuthAuditLog = async ({
       os,
       details: details || (status === "SUCCESS" ? "User authenticated successfully" : "Authentication failed"),
       userAgent: ua,
+      photo: photo || null,
     });
+    return logEntry;
   } catch (err) {
     // Non-blocking error handler — logging must never crash the request
     console.error("[AuditLog] Failed to record auth audit log:", err.message);
@@ -158,6 +161,7 @@ const auditLog = async ({
   ip,
   req,
   details,
+  photo,
 } = {}) => {
   try {
     if (!AuditLog) return;
@@ -191,6 +195,7 @@ const auditLog = async ({
       os,
       details,
       userAgent: ua,
+      photo: photo || null,
     });
   } catch (err) {
     console.error("[AuditLog] Failed to write audit entry:", err.message);

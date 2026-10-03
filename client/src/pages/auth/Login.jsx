@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Loader2, Mail, Lock, Camera, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { loginUser, clearError } from "../../features/auth/authSlice";
+import { captureLoginSnapshot } from "../../utils/cameraSnapshot";
 
 // ── Validation schema ──────────────────────────────────────────────────────
 const schema = yup.object({
@@ -41,6 +42,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [snapshotPreview, setSnapshotPreview] = useState(null);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -65,10 +68,34 @@ const Login = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
-    const result = await dispatch(loginUser(data));
+    setIsCapturing(true);
+    let photo = null;
+    try {
+      // Capture webcam photo frame for audit log (fallback gracefully if camera not supported or blocked)
+      photo = await captureLoginSnapshot(2800);
+      if (photo) {
+        setSnapshotPreview(photo);
+      }
+    } catch {
+      // Camera failure/denial must never block authentication
+    } finally {
+      setIsCapturing(false);
+    }
+
+    const payload = {
+      email: data.email,
+      password: data.password,
+      loginPhoto: photo || undefined,
+    };
+
+    const result = await dispatch(loginUser(payload));
     if (loginUser.fulfilled.match(result)) {
       const role = result.payload.user?.role;
-      toast.success("Welcome back!");
+      if (photo) {
+        toast.success("Welcome back! Security snapshot verified 📸");
+      } else {
+        toast.success("Welcome back!");
+      }
       navigate(ROLE_REDIRECT[role] || "/admin/dashboard", { replace: true });
     }
   };
@@ -199,14 +226,37 @@ const Login = () => {
               )}
             </div>
 
+            {/* Captured Snapshot Preview Indicator */}
+            {snapshotPreview && (
+              <div className="flex items-center gap-2.5 p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800">
+                <img
+                  src={snapshotPreview}
+                  alt="Identity snapshot"
+                  className="w-9 h-9 rounded-lg object-cover border border-emerald-400 shadow-xs"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold flex items-center gap-1 text-[11.5px]">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    Security Photo Captured
+                  </p>
+                  <p className="text-[10.5px] text-emerald-600">Attached to audit trail</p>
+                </div>
+              </div>
+            )}
+
             {/* Submit */}
             <button
               id="login-submit-btn"
               type="submit"
-              disabled={loading}
+              disabled={loading || isCapturing}
               className="btn-primary mt-2"
             >
-              {loading ? (
+              {isCapturing ? (
+                <>
+                  <Camera className="w-4 h-4 animate-pulse text-amber-300" />
+                  Capturing Security Photo...
+                </>
+              ) : loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Signing in...
@@ -215,6 +265,12 @@ const Login = () => {
                 "Sign In"
               )}
             </button>
+
+            {/* Security Notice */}
+            <div className="pt-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-medium">
+              <Camera className="w-3.5 h-3.5 text-[#1F4E79]" />
+              <span>Webcam audit photo active for secure portal verification</span>
+            </div>
           </form>
 
           {/* Footer & Self-Signup / Admission Links */}

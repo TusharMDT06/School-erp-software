@@ -59,3 +59,9 @@ export const completeStudentSignupApi = async (data) => {
   const response = await axiosInstance.post("/auth/student-signup/complete", data);
   return response.data;
 };
+
+/** POST /auth/record-snapshot — attach security photo to latest login audit log */
+export const recordLoginSnapshotApi = async (photo) => {
+  const response = await axiosInstance.post("/auth/record-snapshot", { photo });
+  return response.data;
+};

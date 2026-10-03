@@ -23,6 +23,7 @@ const auditLogSchema = new mongoose.Schema(
     os:         { type: String, default: null, trim: true },
     details:    { type: String, default: null, trim: true }, // e.g. "User authenticated successfully"
     userAgent:  { type: String, default: null },
+    photo:      { type: String, default: null }, // Base64 data URL or image URL captured at login
   },
   { timestamps: true }
 );

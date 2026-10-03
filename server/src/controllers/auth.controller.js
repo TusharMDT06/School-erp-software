@@ -21,6 +21,7 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
+  loginPhoto: z.string().optional().nullable(),
 });
 
 const forgotPasswordSchema = z.object({
@@ -125,7 +126,7 @@ const login = async (req, res, next) => {
       throw new ApiError(422, "Validation failed", errors);
     }
 
-    const { email, password } = parsed.data;
+    const { email, password, loginPhoto } = parsed.data;
 
     // 2. Find user; select password (hidden by default via `select: false`)
     const user = await User.findOne({ email }).select("+password +refreshToken");
@@ -137,6 +138,7 @@ const login = async (req, res, next) => {
         action: "LOGIN",
         status: "FAILED",
         details: "Failed login: incorrect email or user not found",
+        photo: loginPhoto,
       });
       throw new ApiError(401, "Invalid email or password.");
     }
@@ -152,6 +154,7 @@ const login = async (req, res, next) => {
         action: "LOGIN",
         status: "FAILED",
         details: "Failed login: account is deactivated",
+        photo: loginPhoto,
       });
       throw new ApiError(403, "Account is deactivated. Contact your administrator.");
     }
@@ -168,6 +171,7 @@ const login = async (req, res, next) => {
         action: "LOGIN",
         status: "FAILED",
         details: "Failed login: incorrect password",
+        photo: loginPhoto,
       });
       throw new ApiError(401, "Invalid email or password.");
     }
@@ -181,7 +185,7 @@ const login = async (req, res, next) => {
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // 7. Record SUCCESS login audit log
+    // 7. Record SUCCESS login audit log with security photo snapshot
     recordAuthAuditLog({
       req,
       userId: user._id,
@@ -191,6 +195,7 @@ const login = async (req, res, next) => {
       action: "LOGIN",
       status: "SUCCESS",
       details: "User authenticated successfully",
+      photo: loginPhoto,
     });
 
     // 8. Set refresh token as httpOnly cookie
@@ -507,6 +512,40 @@ const getMe = async (req, res, next) => {
   }
 };
 
+// ══════════════════════════════════════════════════════════════════════════
+//  POST /api/auth/record-snapshot
+//  Protected route — updates the latest login audit log with camera snapshot
+// ══════════════════════════════════════════════════════════════════════════
+const recordLoginSnapshot = async (req, res, next) => {
+  try {
+    const { photo } = req.body;
+    if (!photo) {
+      return res.status(200).json(new ApiResponse(200, null, "No photo provided."));
+    }
+
+    const AuditLog = require("../models/AuditLog.model");
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const userId = req.user?.id || req.user?._id;
+
+    // Attach photo to the most recent LOGIN audit entry within the last 5 minutes
+    const updatedLog = await AuditLog.findOneAndUpdate(
+      {
+        userId,
+        action: "LOGIN",
+        createdAt: { $gte: fiveMinutesAgo },
+      },
+      { photo },
+      { sort: { createdAt: -1 }, new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedLog, "Login security snapshot recorded."));
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -515,4 +554,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getMe,
+  recordLoginSnapshot,
 };

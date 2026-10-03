@@ -10,6 +10,7 @@ const {
   forgotPassword,
   resetPassword,
   getMe,
+  recordLoginSnapshot,
 } = require("../controllers/auth.controller");
 const studentSignupRoutes = require("./studentSignup.routes");
 
@@ -64,5 +65,6 @@ router.post(
 );
 
 router.get("/me", authMiddleware, getMe);
+router.post("/record-snapshot", authMiddleware, recordLoginSnapshot);
 
 module.exports = router;

@@ -19,6 +19,10 @@ import {
   ChevronRight,
   X,
   Filter,
+  Camera,
+  CameraOff,
+  Eye,
+  Image as ImageIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { getAuditLogsApi } from "../../api/auditLogApi";
@@ -132,6 +136,8 @@ const AuditLogs = () => {
   const [role, setRole] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [withPhotoOnly, setWithPhotoOnly] = useState(false);
+  const [selectedPhotoLog, setSelectedPhotoLog] = useState(null);
   const [page, setPage] = useState(1);
 
   const fetchLogs = useCallback(
@@ -147,6 +153,7 @@ const AuditLogs = () => {
           role: role || undefined,
           from: fromDate || undefined,
           to: toDate || undefined,
+          hasPhoto: withPhotoOnly ? "true" : undefined,
         };
 
         const res = await getAuditLogsApi(params);
@@ -165,12 +172,12 @@ const AuditLogs = () => {
         setLoading(false);
       }
     },
-    [page, search, actionType, status, role, fromDate, toDate]
+    [page, search, actionType, status, role, fromDate, toDate, withPhotoOnly]
   );
 
   useEffect(() => {
     fetchLogs(page);
-  }, [page, actionType, status, role, fromDate, toDate]);
+  }, [page, actionType, status, role, fromDate, toDate, withPhotoOnly]);
 
   // Debounced search submit
   const handleSearchSubmit = (e) => {
@@ -186,11 +193,12 @@ const AuditLogs = () => {
     setRole("");
     setFromDate("");
     setToDate("");
+    setWithPhotoOnly(false);
     setPage(1);
   };
 
   const hasActiveFilters =
-    search || actionType || status || role || fromDate || toDate;
+    search || actionType || status || role || fromDate || toDate || withPhotoOnly;
 
   return (
     <div className="space-y-6 pb-14 max-w-[1600px] mx-auto">
@@ -385,6 +393,22 @@ const AuditLogs = () => {
               >
                 Failed
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setWithPhotoOnly((prev) => !prev);
+                  setPage(1);
+                }}
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1.5 ${
+                  withPhotoOnly
+                    ? "bg-[#1F4E79] text-white shadow-xs"
+                    : "bg-blue-50 text-[#1F4E79] hover:bg-blue-100 border border-blue-200/60"
+                }`}
+                title="Filter logs that have a login snapshot photo"
+              >
+                <Camera className="w-3 h-3" />
+                <span>{withPhotoOnly ? "Showing With Photo" : "Photo Only"}</span>
+              </button>
             </div>
           </div>
 
@@ -439,6 +463,7 @@ const AuditLogs = () => {
                 <tr className="border-b border-slate-100 bg-white text-[12px] font-semibold text-slate-600">
                   <th className="py-3.5 px-4 font-semibold">Timestamp</th>
                   <th className="py-3.5 px-4 font-semibold">User / Account</th>
+                  <th className="py-3.5 px-4 font-semibold">Security Photo</th>
                   <th className="py-3.5 px-4 font-semibold">Action</th>
                   <th className="py-3.5 px-4 font-semibold">Status</th>
                   <th className="py-3.5 px-4 font-semibold">IP Address</th>
@@ -461,10 +486,25 @@ const AuditLogs = () => {
 
                       {/* User / Account */}
                       <td className="py-4 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
-                            <User className="w-3.5 h-3.5" />
-                          </div>
+                        <div className="flex items-center gap-2.5">
+                          {log.photo ? (
+                            <div
+                              onClick={() => setSelectedPhotoLog(log)}
+                              className="relative cursor-pointer group"
+                              title="Click to view full security snapshot"
+                            >
+                              <img
+                                src={log.photo}
+                                alt={log.userName}
+                                className="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-500/40 group-hover:ring-emerald-500 transition-all shadow-xs"
+                              />
+                              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
+                              <User className="w-4 h-4" />
+                            </div>
+                          )}
                           <div>
                             <div className="font-semibold text-slate-800 leading-tight">
                               {log.userName ||
@@ -480,6 +520,41 @@ const AuditLogs = () => {
                             </span>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Security Photo */}
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        {log.photo ? (
+                          <div className="flex items-center gap-2">
+                            <div
+                              onClick={() => setSelectedPhotoLog(log)}
+                              className="relative group cursor-pointer"
+                              title="Click to view security photo"
+                            >
+                              <img
+                                src={log.photo}
+                                alt="Security Snapshot"
+                                className="w-10 h-10 rounded-xl object-cover ring-2 ring-emerald-500/30 shadow-xs group-hover:scale-105 group-hover:ring-emerald-500 transition-all"
+                              />
+                              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center ring-2 ring-white text-[8px] font-bold">
+                                ✓
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPhotoLog(log)}
+                              className="px-2 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors flex items-center gap-1 shadow-2xs"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>Snapshot</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                            <CameraOff className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
+                            No photo
+                          </span>
+                        )}
                       </td>
 
                       {/* Action */}
@@ -576,6 +651,139 @@ const AuditLogs = () => {
           </div>
         )}
       </div>
+
+      {/* ── Security Photo Verification Modal ─────────────────────── */}
+      {selectedPhotoLog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-fadeIn"
+          onClick={() => setSelectedPhotoLog(null)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-800 leading-tight">
+                    Login Security Snapshot
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Biometric / webcam photo recorded upon portal authentication
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPhotoLog(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Photo Display Card */}
+            <div className="p-6 space-y-4">
+              <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner flex items-center justify-center min-h-[240px] max-h-[350px]">
+                <img
+                  src={selectedPhotoLog.photo}
+                  alt="Login security snapshot"
+                  className="w-full max-h-[350px] object-contain"
+                />
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-emerald-400 text-[11px] font-bold flex items-center gap-1.5 border border-emerald-500/40 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  VERIFIED PORTAL SNAPSHOT
+                </div>
+                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md text-white text-[11px] font-mono">
+                  {formatTimestamp(selectedPhotoLog.createdAt)}
+                </div>
+              </div>
+
+              {/* Metadata Details Grid */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    USER / ACCOUNT
+                  </span>
+                  <p className="font-bold text-slate-800 text-sm truncate">
+                    {selectedPhotoLog.userName}
+                  </p>
+                  <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
+                    {selectedPhotoLog.userRole}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    ACTION & STATUS
+                  </span>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <span>{selectedPhotoLog.action}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        selectedPhotoLog.status === "SUCCESS"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
+                      {selectedPhotoLog.status}
+                    </span>
+                  </div>
+                  <p
+                    className="text-[11px] text-slate-500 mt-1 truncate"
+                    title={selectedPhotoLog.details}
+                  >
+                    {selectedPhotoLog.details}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    IP ADDRESS
+                  </span>
+                  <div className="flex items-center gap-1.5 font-mono text-slate-800 font-semibold">
+                    <Globe className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span>{selectedPhotoLog.ip || "127.0.0.1"}</span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    DEVICE & BROWSER
+                  </span>
+                  <div className="flex items-center gap-1.5 text-slate-800 font-medium">
+                    {getDeviceIcon(
+                      selectedPhotoLog.device,
+                      selectedPhotoLog.deviceType
+                    )}
+                    <span className="truncate">
+                      {selectedPhotoLog.device || "Windows"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-mono truncate max-w-[240px]">
+                Audit ID: {selectedPhotoLog._id}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedPhotoLog(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold shadow-sm transition-all"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

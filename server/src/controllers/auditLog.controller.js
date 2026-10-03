@@ -63,6 +63,10 @@ const getAuditLogs = async (req, res, next) => {
       filter.userRole = role.toLowerCase().trim();
     }
 
+    if (req.query.hasPhoto === "true") {
+      filter.photo = { $ne: null };
+    }
+
     if (from || to) {
       filter.createdAt = {};
       if (from) filter.createdAt.$gte = new Date(from);
