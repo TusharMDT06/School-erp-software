@@ -102,6 +102,7 @@ import MyPayslips from "../pages/teacher/MyPayslips";
 import ReportsPage from "../pages/accountant/Reports";
 import ReconciliationPage from "../pages/accountant/Reconciliation";
 import AuditLogPage from "../pages/accountant/AuditLog";
+import AdminAuditLogs from "../pages/admin/AuditLogs";
 import MyActivityPage from "../pages/accountant/MyActivity";
 
 // ── Phase 8A: Principal & Approvals & Calendar & Circulars ───────────────────
@@ -186,7 +187,7 @@ const AppRoutes = () => {
 
           {/* Financial Reports & Institutional Audit Logs */}
           <Route path="/admin/reports" element={<ReportsPage />} />
-          <Route path="/admin/audit-logs" element={<AuditLogPage />} />
+          <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />
 
           {/* Phase 8B: Academics, Welfare, Staff & Incidents */}
           <Route path="/admin/academics" element={<Academics />} />

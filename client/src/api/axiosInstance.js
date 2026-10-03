@@ -80,7 +80,7 @@ axiosInstance.interceptors.response.use(
         // Attempt silent token refresh
         const result = await store.dispatch(refreshAccessToken());
 
-        if (refreshAccessToken.fulfilled.match(result)) {
+        if (refreshAccessToken.fulfilled.match(result) && result.payload?.accessToken) {
           const newToken = result.payload.accessToken;
           processQueue(null, newToken);
           originalRequest.headers.Authorization = `Bearer ${newToken}`;

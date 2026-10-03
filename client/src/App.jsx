@@ -18,12 +18,21 @@ const App = () => {
 
   useEffect(() => {
     const silentRefresh = async () => {
+      const hasSession = localStorage.getItem("school_erp_session") === "active";
+      if (!hasSession) {
+        // No active session — skip calling refresh-token to avoid unnecessary network calls
+        dispatch(setInitialized());
+        return;
+      }
+
       try {
         const result = await dispatch(refreshAccessToken());
-        if (refreshAccessToken.fulfilled.match(result)) {
+        if (refreshAccessToken.fulfilled.match(result) && result.payload?.accessToken) {
           // Token refreshed — now get the full user profile
           await dispatch(fetchCurrentUser());
         }
+      } catch {
+        // Silently handled
       } finally {
         dispatch(setInitialized());
       }

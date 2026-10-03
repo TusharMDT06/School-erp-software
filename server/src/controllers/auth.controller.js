@@ -5,6 +5,7 @@ const User = require("../models/User.model");
 const { generateAccessToken, generateRefreshToken } = require("../utils/generateToken");
 const sendEmail = require("../utils/sendEmail");
 const { ApiResponse, ApiError } = require("../utils/apiResponse");
+const { recordAuthAuditLog } = require("../utils/auditLog");
 
 // ─── Zod Validation Schemas ────────────────────────────────────────────────
 
@@ -41,6 +42,7 @@ const refreshCookieOptions = {
   secure: isHttpsOrProd,  // HTTPS only (required for sameSite: "none")
   sameSite: isHttpsOrProd ? "none" : "lax", // "none" allows cross-domain cookies between Render frontend & backend
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  path: "/",
 };
 
 // ─── Helper: Role-to-Dashboard Map (used in error hints) ──────────────────
@@ -110,6 +112,16 @@ const login = async (req, res, next) => {
         field: e.path.join("."),
         message: e.message,
       }));
+      if (req.body?.email) {
+        recordAuthAuditLog({
+          req,
+          userName: req.body.email.includes("@") ? req.body.email.split("@")[0] : req.body.email,
+          userRole: "unknown",
+          action: "LOGIN",
+          status: "FAILED",
+          details: "Failed login: invalid email or password format",
+        });
+      }
       throw new ApiError(422, "Validation failed", errors);
     }
 
@@ -118,17 +130,45 @@ const login = async (req, res, next) => {
     // 2. Find user; select password (hidden by default via `select: false`)
     const user = await User.findOne({ email }).select("+password +refreshToken");
     if (!user) {
+      recordAuthAuditLog({
+        req,
+        userName: email.includes("@") ? email.split("@")[0] : email,
+        userRole: "unknown",
+        action: "LOGIN",
+        status: "FAILED",
+        details: "Failed login: incorrect email or user not found",
+      });
       throw new ApiError(401, "Invalid email or password.");
     }
 
     // 3. Check account status
     if (!user.isActive) {
+      recordAuthAuditLog({
+        req,
+        userId: user._id,
+        schoolId: user.schoolId,
+        userName: user.name || (user.email ? user.email.split("@")[0] : "user"),
+        userRole: user.role,
+        action: "LOGIN",
+        status: "FAILED",
+        details: "Failed login: account is deactivated",
+      });
       throw new ApiError(403, "Account is deactivated. Contact your administrator.");
     }
 
     // 4. Compare passwords
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      recordAuthAuditLog({
+        req,
+        userId: user._id,
+        schoolId: user.schoolId,
+        userName: user.name || (user.email ? user.email.split("@")[0] : "user"),
+        userRole: user.role,
+        action: "LOGIN",
+        status: "FAILED",
+        details: "Failed login: incorrect password",
+      });
       throw new ApiError(401, "Invalid email or password.");
     }
 
@@ -141,10 +181,22 @@ const login = async (req, res, next) => {
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
-    // 7. Set refresh token as httpOnly cookie
+    // 7. Record SUCCESS login audit log
+    recordAuthAuditLog({
+      req,
+      userId: user._id,
+      schoolId: user.schoolId,
+      userName: user.name || (user.email ? user.email.split("@")[0] : "user"),
+      userRole: user.role,
+      action: "LOGIN",
+      status: "SUCCESS",
+      details: "User authenticated successfully",
+    });
+
+    // 8. Set refresh token as httpOnly cookie
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
-    // 8. Return access token + safe user data
+    // 9. Return access token + safe user data
     return res.status(200).json(
       new ApiResponse(
         200,
@@ -177,7 +229,13 @@ const refreshToken = async (req, res, next) => {
     const token = req.cookies?.refreshToken;
 
     if (!token) {
-      throw new ApiError(401, "Refresh token missing. Please log in again.");
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          { accessToken: null, authenticated: false },
+          "No active session."
+        )
+      );
     }
 
     // 1. Verify the refresh token signature
@@ -185,7 +243,19 @@ const refreshToken = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     } catch {
-      throw new ApiError(401, "Invalid or expired refresh token. Please log in again.");
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: isHttpsOrProd,
+        sameSite: isHttpsOrProd ? "none" : "lax",
+        path: "/",
+      });
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          { accessToken: null, authenticated: false },
+          "Refresh token expired or invalid."
+        )
+      );
     }
 
     // 2. Find user and validate stored refresh token (single-session check)
@@ -196,8 +266,15 @@ const refreshToken = async (req, res, next) => {
         httpOnly: true,
         secure: isHttpsOrProd,
         sameSite: isHttpsOrProd ? "none" : "lax",
+        path: "/",
       });
-      throw new ApiError(401, "Session invalid. Please log in again.");
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          { accessToken: null, authenticated: false },
+          "Session invalid or expired."
+        )
+      );
     }
 
     // 3. Issue new access token
@@ -209,7 +286,13 @@ const refreshToken = async (req, res, next) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, { accessToken }, "Access token refreshed."));
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, authenticated: true },
+          "Access token refreshed."
+        )
+      );
   } catch (err) {
     next(err);
   }
@@ -221,14 +304,36 @@ const refreshToken = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     const token = req.cookies?.refreshToken;
+    let loggedUser = null;
 
     if (token) {
-      // Clear the refreshToken field in DB for the user who owns this token
-      await User.findOneAndUpdate(
+      // Clear the refreshToken field in DB and get user data
+      loggedUser = await User.findOneAndUpdate(
         { refreshToken: token },
         { $set: { refreshToken: null } },
         { new: false }
       );
+    } else if (req.headers?.authorization?.startsWith("Bearer ")) {
+      try {
+        const bearer = req.headers.authorization.split(" ")[1];
+        const decoded = jwt.verify(bearer, process.env.JWT_SECRET);
+        if (decoded?.id) {
+          loggedUser = await User.findById(decoded.id);
+        }
+      } catch {}
+    }
+
+    if (loggedUser) {
+      recordAuthAuditLog({
+        req,
+        userId: loggedUser._id,
+        schoolId: loggedUser.schoolId,
+        userName: loggedUser.name || (loggedUser.email ? loggedUser.email.split("@")[0] : "user"),
+        userRole: loggedUser.role,
+        action: "LOGOUT",
+        status: "SUCCESS",
+        details: "User logged out successfully",
+      });
     }
 
     // Clear cookie regardless
@@ -236,6 +341,7 @@ const logout = async (req, res, next) => {
       httpOnly: true,
       secure: isHttpsOrProd,
       sameSite: isHttpsOrProd ? "none" : "lax",
+      path: "/",
     });
 
     return res
@@ -360,6 +466,17 @@ const resetPassword = async (req, res, next) => {
     user.resetPasswordExpires = undefined;
     user.refreshToken = undefined; // Invalidate all existing sessions
     await user.save();
+
+    recordAuthAuditLog({
+      req,
+      userId: user._id,
+      schoolId: user.schoolId,
+      userName: user.name || (user.email ? user.email.split("@")[0] : "user"),
+      userRole: user.role,
+      action: "PASSWORD_RESET",
+      status: "SUCCESS",
+      details: "Password reset completed successfully",
+    });
 
     return res
       .status(200)

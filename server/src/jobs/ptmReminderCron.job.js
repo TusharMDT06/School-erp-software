@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const cron = require("node-cron");
 const PTMSlot = require("../models/PTMSlot.model");
 const PTMEvent = require("../models/PTMEvent.model");
@@ -20,6 +21,7 @@ try {
  */
 const startPTMReminderCron = () => {
   cron.schedule("*/15 * * * *", async () => {
+    if (mongoose.connection.readyState !== 1) return;
     try {
       const now = new Date();
 

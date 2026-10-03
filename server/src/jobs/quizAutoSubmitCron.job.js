@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const cron = require("node-cron");
 const QuizAttempt = require("../models/QuizAttempt.model");
 const Quiz = require("../models/Quiz.model");
@@ -8,10 +9,23 @@ const Quiz = require("../models/Quiz.model");
  * and automatically grades their last autosaved answers.
  */
 const startQuizAutoSubmitCron = () => {
+  let isRunning = false;
+
   cron.schedule("* * * * *", async () => {
+    // 1. Guard against overlapping executions
+    if (isRunning) return;
+
+    // 2. Guard against executing when database connection is offline or reconnecting
+    if (mongoose.connection.readyState !== 1) {
+      return;
+    }
+
+    isRunning = true;
     try {
       const now = Date.now();
-      const openAttempts = await QuizAttempt.find({ submittedAt: null }).populate("quizId");
+      const openAttempts = await QuizAttempt.find({ submittedAt: null })
+        .populate("quizId")
+        .maxTimeMS(5000);
 
       if (!openAttempts || openAttempts.length === 0) return;
 
@@ -60,7 +74,9 @@ const startQuizAutoSubmitCron = () => {
         }
       }
     } catch (err) {
-      console.warn("[QuizAutoSubmitCron] Error running auto-submit check:", err.message);
+      console.warn("[QuizAutoSubmitCron] Auto-submit check deferred:", err.message);
+    } finally {
+      isRunning = false;
     }
   });
 

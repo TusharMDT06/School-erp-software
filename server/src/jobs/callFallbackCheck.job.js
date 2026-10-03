@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const cron = require("node-cron");
 const CallLog = require("../models/CallLog.model");
 const { triggerFallbacks } = require("../services/voiceCall.service");
@@ -8,6 +9,9 @@ const { triggerFallbacks } = require("../services/voiceCall.service");
  * Treats them as failed calls and triggers SMS & WhatsApp fallbacks.
  */
 const runCallFallbackCheck = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    return { skipped: true };
+  }
   try {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 

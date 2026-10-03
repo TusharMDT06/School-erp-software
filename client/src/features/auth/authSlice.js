@@ -2,10 +2,19 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginApi, logoutApi, getMeApi, refreshTokenApi } from "../../api/authApi";
 
 // ─── Initial State ─────────────────────────────────────────────────────────
+const savedUser = (() => {
+  try {
+    const raw = localStorage.getItem("school_erp_user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const initialState = {
-  user: null,           // { id, name, email, role, schoolId, profileImage }
+  user: savedUser,      // { id, name, email, role, schoolId, profileImage }
   accessToken: null,    // JWT access token (in memory only — NOT localStorage)
-  isAuthenticated: false,
+  isAuthenticated: Boolean(savedUser),
   isInitialized: false, // Tracks whether initial auth check has completed
   loading: false,
   error: null,
@@ -75,6 +84,9 @@ export const refreshAccessToken = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await refreshTokenApi();
+      if (!response?.data?.accessToken) {
+        return rejectWithValue("No active session.");
+      }
       return response.data; // { accessToken }
     } catch (error) {
       const message =
@@ -97,6 +109,10 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.isAuthenticated = false;
       state.error = null;
+      try {
+        localStorage.removeItem("school_erp_session");
+        localStorage.removeItem("school_erp_user");
+      } catch {}
     },
     /** Clear error message (e.g., on form re-submit) */
     clearError: (state) => {
@@ -110,6 +126,10 @@ const authSlice = createSlice({
       state.isInitialized = true;
       state.error = null;
       state.loading = false;
+      try {
+        localStorage.setItem("school_erp_session", "active");
+        localStorage.setItem("school_erp_user", JSON.stringify(action.payload.user));
+      } catch {}
     },
     /** Mark initial authentication check as done */
     setInitialized: (state) => {
@@ -130,12 +150,20 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.isInitialized = true;
         state.error = null;
+        try {
+          localStorage.setItem("school_erp_session", "active");
+          localStorage.setItem("school_erp_user", JSON.stringify(action.payload.user));
+        } catch {}
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.isAuthenticated = false;
         state.isInitialized = true;
+        try {
+          localStorage.removeItem("school_erp_session");
+          localStorage.removeItem("school_erp_user");
+        } catch {}
       });
 
     // ── logoutUser ─────────────────────────────────────────────────────
@@ -147,6 +175,10 @@ const authSlice = createSlice({
         state.isInitialized = true;
         state.error = null;
         state.loading = false;
+        try {
+          localStorage.removeItem("school_erp_session");
+          localStorage.removeItem("school_erp_user");
+        } catch {}
       });
 
     // ── fetchCurrentUser ───────────────────────────────────────────────
@@ -159,11 +191,13 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
         state.isInitialized = true;
+        try {
+          localStorage.setItem("school_erp_user", JSON.stringify(action.payload));
+        } catch {}
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.loading = false;
         state.isInitialized = true;
-        // Don't set error here — this is a background check
       });
 
     // ── refreshAccessToken ─────────────────────────────────────────────
@@ -171,13 +205,21 @@ const authSlice = createSlice({
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
+        state.isInitialized = true;
+        try {
+          localStorage.setItem("school_erp_session", "active");
+        } catch {}
       })
       .addCase(refreshAccessToken.rejected, (state) => {
-        // Refresh failed — clear everything
+        // Refresh failed — clear session
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
         state.isInitialized = true;
+        try {
+          localStorage.removeItem("school_erp_session");
+          localStorage.removeItem("school_erp_user");
+        } catch {}
       });
   },
 });
