@@ -80,5 +80,5 @@ const startServer = async () => {
   });
 };
 
-// Bootstrap application
+// Bootstrap application with Upstash Redis caching
 startServer();
