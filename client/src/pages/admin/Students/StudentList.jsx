@@ -1,14 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Plus, Search, Filter, ChevronLeft, ChevronRight,
-  Eye, Pencil, UserX, GraduationCap, Trash2,
+  Eye, Pencil, UserX, GraduationCap, Trash2, CreditCard, Ticket,
 } from "lucide-react";
 import { fetchStudents, deleteStudent, updateStudent } from "../../../features/student/studentSlice";
 import { fetchClasses } from "../../../features/class/classSlice";
 import StudentForm from "./StudentForm";
+import StudentIDCardModal from "./StudentIDCardModal";
 
 const SkeletonRow = () => (
   <tr className="animate-pulse">
@@ -39,6 +40,7 @@ const StatusBadge = ({ status }) => {
 const StudentList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { students, loading, totalCount, totalPages, page } = useSelector(
     (s) => s.student
   );
@@ -53,6 +55,26 @@ const StudentList = () => {
   const [editTarget, setEditTarget] = useState(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // ID Card & Gate Pass modal state
+  const [idCardModalOpen, setIdCardModalOpen] = useState(false);
+  const [selectedStudentForCard, setSelectedStudentForCard] = useState(null);
+  const [cardModalTab, setCardModalTab] = useState("idcard");
+
+  // React to URL action query params (?action=new, ?action=idcard, ?action=gatepass)
+  useEffect(() => {
+    const action = searchParams.get("action");
+    if (action === "new") {
+      setEditTarget(null);
+      setModalOpen(true);
+    } else if (action === "idcard") {
+      setCardModalTab("idcard");
+      setIdCardModalOpen(true);
+    } else if (action === "gatepass") {
+      setCardModalTab("gatepass");
+      setIdCardModalOpen(true);
+    }
+  }, [searchParams]);
 
   // Load classes for filter dropdown
   useEffect(() => {
@@ -119,7 +141,18 @@ const StudentList = () => {
   const handleModalClose = () => {
     setModalOpen(false);
     setEditTarget(null);
+    if (searchParams.get("action")) {
+      setSearchParams({}, { replace: true });
+    }
     reload(currentPage);
+  };
+
+  const handleIdCardModalClose = () => {
+    setIdCardModalOpen(false);
+    setSelectedStudentForCard(null);
+    if (searchParams.get("action")) {
+      setSearchParams({}, { replace: true });
+    }
   };
 
   return (
@@ -130,13 +163,26 @@ const StudentList = () => {
           <h2 className="text-xl font-bold text-slate-800">Students</h2>
           <p className="text-sm text-slate-500 mt-0.5">{totalCount} total students</p>
         </div>
-        <button
-          onClick={() => { setEditTarget(null); setModalOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1F4E79] text-white rounded-lg text-sm font-medium hover:bg-[#1a4268] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Student
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setCardModalTab("idcard");
+              setSelectedStudentForCard(students[0] || null);
+              setIdCardModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+          >
+            <CreditCard className="w-4 h-4 text-slate-600" />
+            ID Card & Passes
+          </button>
+          <button
+            onClick={() => navigate("/admin/students/admission")}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1F4E79] text-white rounded-lg text-sm font-medium hover:bg-[#1a4268] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Student
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -233,18 +279,32 @@ const StudentList = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-2xs">
-                            {userInfo?.profileImage ? (
-                              <img
-                                src={userInfo.profileImage}
-                                alt={s.name || userInfo?.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              (s.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()
+                          <div className="relative">
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-2xs">
+                              {s.profileImage || userInfo?.profileImage ? (
+                                <img
+                                  src={s.profileImage || userInfo?.profileImage}
+                                  alt={s.name || userInfo?.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                (s.name || userInfo?.name || "S")?.charAt(0)?.toUpperCase()
+                              )}
+                            </div>
+                            {s.guardianPhoto && (
+                              <div
+                                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full overflow-hidden border border-white shadow-xs"
+                                title={`Guardian: ${s.guardianName || "Authorized Pickup"}`}
+                              >
+                                <img
+                                  src={s.guardianPhoto}
+                                  alt="Guardian"
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
                             )}
                           </div>
                           <div>
@@ -274,6 +334,17 @@ const StudentList = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedStudentForCard(s);
+                              setCardModalTab("idcard");
+                              setIdCardModalOpen(true);
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                            title="Print ID Card / Pass"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => navigate(`/admin/students/${s._id}`)}
                             className="p-1.5 rounded-lg text-slate-400 hover:bg-sky-50 hover:text-sky-600 transition-colors"
@@ -406,6 +477,15 @@ const StudentList = () => {
           </div>
         </div>
       )}
+
+      {/* Student ID Card & Gate Pass Modal */}
+      <StudentIDCardModal
+        isOpen={idCardModalOpen}
+        onClose={handleIdCardModalClose}
+        students={students}
+        initialStudent={selectedStudentForCard}
+        initialTab={cardModalTab}
+      />
     </div>
   );
 };

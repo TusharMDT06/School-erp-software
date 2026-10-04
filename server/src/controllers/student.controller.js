@@ -21,6 +21,11 @@ const createStudentSchema = z.object({
   address: z.string().optional().nullable(),
   bloodGroup: z.string().optional().nullable(),
   admissionDate: z.string().optional().nullable(),
+  profileImage: z.string().optional().nullable(),
+  guardianPhoto: z.string().optional().nullable(),
+  guardianName: z.string().optional().nullable(),
+  guardianPhone: z.string().optional().nullable(),
+  guardianRelation: z.string().optional().nullable(),
   guardianEmail: z.string().email().optional().nullable(), // for admission instructions email
   guardianIds: z.array(z.string()).optional(),
   phone: z.string().optional().nullable(),
@@ -35,6 +40,11 @@ const updateStudentSchema = z.object({
   rollNumber: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   bloodGroup: z.string().optional().nullable(),
+  profileImage: z.string().optional().nullable(),
+  guardianPhoto: z.string().optional().nullable(),
+  guardianName: z.string().optional().nullable(),
+  guardianPhone: z.string().optional().nullable(),
+  guardianRelation: z.string().optional().nullable(),
   status: z.enum(["active", "transferred", "alumni"]).optional(),
   guardianIds: z.array(z.string()).optional(),
 });
@@ -103,6 +113,11 @@ const createStudent = async (req, res, next) => {
       address,
       bloodGroup,
       admissionDate,
+      profileImage,
+      guardianPhoto,
+      guardianName,
+      guardianPhone,
+      guardianRelation,
       guardianEmail,
       guardianIds,
     } = parsed.data;
@@ -138,6 +153,11 @@ const createStudent = async (req, res, next) => {
       address: address || null,
       bloodGroup: bloodGroup || null,
       admissionDate: admissionDate ? new Date(admissionDate) : Date.now(),
+      profileImage: profileImage || null,
+      guardianPhoto: guardianPhoto || null,
+      guardianName: guardianName || null,
+      guardianPhone: guardianPhone || null,
+      guardianRelation: guardianRelation || null,
     });
 
     // Send admission instructions email to parent (non-blocking)
@@ -367,14 +387,30 @@ const updateStudent = async (req, res, next) => {
     const student = await Student.findById(req.params.id);
     if (!student) throw new ApiError(404, "Student not found.");
 
-    const { name, phone, dob, gender, classId, rollNumber, address, bloodGroup, status, guardianIds } =
-      parsed.data;
+    const {
+      name,
+      phone,
+      dob,
+      gender,
+      classId,
+      rollNumber,
+      address,
+      bloodGroup,
+      profileImage,
+      guardianPhoto,
+      guardianName,
+      guardianPhone,
+      guardianRelation,
+      status,
+      guardianIds,
+    } = parsed.data;
 
     // Update linked User if user account exists
-    if (student.userId && (name || phone !== undefined)) {
+    if (student.userId && (name || phone !== undefined || profileImage !== undefined)) {
       const userUpdates = {};
       if (name) userUpdates.name = name;
       if (phone !== undefined) userUpdates.phone = phone;
+      if (profileImage !== undefined) userUpdates.profileImage = profileImage;
       await User.findByIdAndUpdate(student.userId, userUpdates, { runValidators: true });
     }
 
@@ -387,6 +423,11 @@ const updateStudent = async (req, res, next) => {
     if (rollNumber !== undefined) studentUpdates.rollNumber = rollNumber;
     if (address !== undefined) studentUpdates.address = address;
     if (bloodGroup !== undefined) studentUpdates.bloodGroup = bloodGroup;
+    if (profileImage !== undefined) studentUpdates.profileImage = profileImage;
+    if (guardianPhoto !== undefined) studentUpdates.guardianPhoto = guardianPhoto;
+    if (guardianName !== undefined) studentUpdates.guardianName = guardianName;
+    if (guardianPhone !== undefined) studentUpdates.guardianPhone = guardianPhone;
+    if (guardianRelation !== undefined) studentUpdates.guardianRelation = guardianRelation;
     if (status) studentUpdates.status = status;
     if (guardianIds) studentUpdates.guardianIds = guardianIds;
 

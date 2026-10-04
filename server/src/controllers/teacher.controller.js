@@ -14,6 +14,7 @@ const createTeacherSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().optional().nullable(),
+  profileImage: z.string().optional().nullable(),
   schoolId: z.string().optional().nullable(),
   // Teacher-specific fields
   employeeId: z.string().min(1, "Employee ID is required").trim(),
@@ -27,6 +28,7 @@ const updateTeacherSchema = z.object({
   // User fields (optional on update)
   name: z.string().min(2).trim().optional(),
   phone: z.string().optional().nullable(),
+  profileImage: z.string().optional().nullable(),
   // Teacher-specific fields
   employeeId: z.string().min(1).trim().optional(),
   subjects: z.array(z.string()).optional(),
@@ -79,7 +81,7 @@ const createTeacher = async (req, res, next) => {
     }
 
     const {
-      name, email, password, phone, schoolId,
+      name, email, password, phone, schoolId, profileImage,
       employeeId, subjects, qualifications, joiningDate, salary,
     } = parsed.data;
 
@@ -102,6 +104,7 @@ const createTeacher = async (req, res, next) => {
       password,
       role: "teacher",
       phone: phone || null,
+      profileImage: profileImage || null,
       schoolId: schoolId || req.user?.schoolId || null,
     });
 
@@ -124,7 +127,7 @@ const createTeacher = async (req, res, next) => {
     }).catch((err) => console.error("Welcome email failed (teacher):", err));
 
     // Populate user info for response
-    await teacher.populate("userId", "name email phone role");
+    await teacher.populate("userId", "name email phone role profileImage");
 
     return res
       .status(201)
@@ -291,14 +294,15 @@ const updateTeacher = async (req, res, next) => {
       }
     }
 
-    const { name, phone, employeeId, subjects, qualifications, joiningDate, salary, assignedClasses } =
+    const { name, phone, profileImage, employeeId, subjects, qualifications, joiningDate, salary, assignedClasses } =
       parsed.data;
 
     // Update linked User fields if provided
-    if (name || phone !== undefined) {
+    if (name || phone !== undefined || profileImage !== undefined) {
       const userUpdates = {};
       if (name) userUpdates.name = name;
       if (phone !== undefined) userUpdates.phone = phone;
+      if (profileImage !== undefined) userUpdates.profileImage = profileImage;
       await User.findByIdAndUpdate(teacher.userId, userUpdates, { runValidators: true });
     }
 
@@ -314,7 +318,7 @@ const updateTeacher = async (req, res, next) => {
     const updated = await Teacher.findByIdAndUpdate(req.params.id, teacherUpdates, {
       new: true,
       runValidators: true,
-    }).populate("userId", "name email phone isActive");
+    }).populate("userId", "name email phone isActive profileImage");
 
     return res
       .status(200)

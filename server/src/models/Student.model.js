@@ -59,6 +59,29 @@ const studentSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    profileImage: {
+      type: String,
+      default: null,
+    },
+    guardianPhoto: {
+      type: String,
+      default: null,
+    },
+    guardianName: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    guardianPhone: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    guardianRelation: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     guardianIds: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Plus, Search, ChevronLeft, ChevronRight,
@@ -33,6 +34,8 @@ const StatusPill = ({ isActive }) => (
 
 const TeacherList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { teachers, loading, totalCount, totalPages, page } = useSelector(
     (s) => s.teacher
   );
@@ -44,6 +47,15 @@ const TeacherList = () => {
   const [editTarget, setEditTarget] = useState(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // Automatically open modal when ?action=new is in the URL
+  useEffect(() => {
+    const action = searchParams.get("action");
+    if (action === "new") {
+      setEditTarget(null);
+      setModalOpen(true);
+    }
+  }, [searchParams]);
 
   const reload = useCallback(
     (p = currentPage) => {
@@ -103,6 +115,9 @@ const TeacherList = () => {
   const handleModalClose = () => {
     setModalOpen(false);
     setEditTarget(null);
+    if (searchParams.get("action")) {
+      setSearchParams({}, { replace: true });
+    }
     reload();
   };
 
@@ -126,7 +141,7 @@ const TeacherList = () => {
             />
           </div>
           <button
-            onClick={() => { setEditTarget(null); setModalOpen(true); }}
+            onClick={() => navigate("/admin/teachers/new")}
             className="flex items-center gap-2 px-4 py-2 bg-[#1F4E79] text-white rounded-lg text-sm font-medium hover:bg-[#1a4268] transition-colors whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />

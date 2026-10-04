@@ -22,11 +22,13 @@ import ClassList from "../pages/admin/Classes/ClassList";
 
 // ── Admin: Teachers ────────────────────────────────────────────────────────────
 import TeacherList from "../pages/admin/Teachers/TeacherList";
+import AddTeacher from "../pages/admin/Teachers/AddTeacher";
 import TeacherAttendancePage from "../pages/admin/TeacherAttendance";
 import TeacherSalaryPage from "../pages/admin/TeacherSalary";
 
 // ── Admin: Students ────────────────────────────────────────────────────────────
 import StudentList from "../pages/admin/Students/StudentList";
+import NewAdmission from "../pages/admin/Students/NewAdmission";
 import StudentProfile from "../pages/admin/Students/StudentProfile";
 
 // ── Admin: Schools & Settings ──────────────────────────────────────────────────
@@ -161,11 +163,13 @@ const AppRoutes = () => {
 
           {/* Teachers */}
           <Route path="/admin/teachers" element={<TeacherList />} />
+          <Route path="/admin/teachers/new" element={<AddTeacher />} />
           <Route path="/admin/teachers/attendance" element={<TeacherAttendancePage />} />
           <Route path="/admin/teachers/salary" element={<TeacherSalaryPage />} />
 
           {/* Students */}
           <Route path="/admin/students" element={<StudentList />} />
+          <Route path="/admin/students/admission" element={<NewAdmission />} />
           <Route path="/admin/students/:id" element={<StudentProfile />} />
 
           {/* Attendance Reports & Approvals (Unified Approval Center) */}
