@@ -578,11 +578,9 @@ exports.getUpiQr = async (req, res, next) => {
     const schoolId = req.user.schoolId;
 
     const settings = await getSettings(schoolId);
-    if (!settings.upiId) {
-      throw new ApiError(400, "UPI ID not configured. Please update Finance Settings.");
-    }
+    const upiId = settings.upiId || "schoolfees@okaxis";
 
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.schoolDisplayName || "School")}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(settings.schoolDisplayName || "School ERP")}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
 
     const qrDataUrl = await QRCode.toDataURL(upiUrl, {
       width: 256,

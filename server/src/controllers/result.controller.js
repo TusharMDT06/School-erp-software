@@ -369,8 +369,15 @@ const getStudentResults = async (req, res, next) => {
       throw new ApiError(403, "Access denied to other students' results.");
     }
     if (req.user.role === "parent") {
-      const isChild = student.guardianIds?.some((gid) => gid.toString() === req.user.id);
-      if (!isChild) {
+      const isChild =
+        student.guardianIds?.some(
+          (gid) =>
+            gid.toString() === req.user.id ||
+            gid.toString() === req.user._id?.toString()
+        ) ||
+        (req.user.phone && (student.parentPhone === req.user.phone || student.guardianPhone === req.user.phone)) ||
+        (req.user.email && student.parentEmail === req.user.email);
+      if (!isChild && !["admin", "superadmin", "principal"].includes(req.user.role)) {
         throw new ApiError(403, "Access denied to non-linked student results.");
       }
     }

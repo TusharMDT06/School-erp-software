@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   X,
   CreditCard,
@@ -25,6 +25,12 @@ const StudentIDCardModal = ({
   const [selectedStudentId, setSelectedStudentId] = useState(
     initialStudent?._id || (students.length > 0 ? students[0]._id : "")
   );
+
+  useEffect(() => {
+    if (!selectedStudentId && students && students.length > 0) {
+      setSelectedStudentId(initialStudent?._id || students[0]._id);
+    }
+  }, [students, initialStudent, selectedStudentId]);
 
   const [gatePassReason, setGatePassReason] = useState("Medical Appointment");
   const [gatePassTime, setGatePassTime] = useState("01:30 PM");
@@ -60,6 +66,7 @@ const StudentIDCardModal = ({
   const guardianPhone = currentStudent?.guardianPhone || currentStudent?.emergencyContact?.phone || userInfo?.phone || "+91 98765 43210";
   const guardianRelation = currentStudent?.guardianRelation || "Parent / Guardian";
   const fatherName = guardianName;
+  const phone = guardianPhone;
 
   const handlePrint = () => {
     window.print();

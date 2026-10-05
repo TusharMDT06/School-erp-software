@@ -41,6 +41,14 @@ const studentRemarkSchema = new mongoose.Schema(
       default: Date.now,
       index: true,
     },
+    parentAcknowledged: {
+      type: Boolean,
+      default: false,
+    },
+    parentAcknowledgedAt: {
+      type: Date,
+      default: null,
+    },
     editHistory: [
       {
         text: { type: String, required: true },

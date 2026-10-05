@@ -655,6 +655,13 @@ const getChildHomework = async (req, res, next) => {
     const isParentMatch =
       req.user.role === "admin" ||
       req.user.role === "superadmin" ||
+      req.user.role === "principal" ||
+      (student.guardianIds &&
+        student.guardianIds.some(
+          (gid) =>
+            gid.toString() === req.user.id ||
+            gid.toString() === req.user._id?.toString()
+        )) ||
       (req.user.phone && student.parentPhone === req.user.phone) ||
       (req.user.email && student.parentEmail === req.user.email) ||
       (req.user.phone && student.guardianPhone === req.user.phone);

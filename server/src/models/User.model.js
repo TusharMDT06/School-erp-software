@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    pushToken: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     // Stored for refresh-token validation and single-device logout
     refreshToken: {
       type: String,

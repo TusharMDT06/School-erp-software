@@ -7,6 +7,6 @@ const ctrl = require("../controllers/financeSettings.controller");
 router.use(authMiddleware);
 
 router.get("/", authorizeRoles("admin", "superadmin", "principal", "accountant"), ctrl.getFinanceSettings);
-router.put("/", authorizeRoles("admin", "superadmin", "principal"), ctrl.updateFinanceSettings);
+router.put("/", authorizeRoles("admin", "superadmin", "principal", "accountant"), ctrl.updateFinanceSettings);
 
 module.exports = router;

@@ -227,7 +227,48 @@ const appreciateRemark = async (req, res, next) => {
       throw new ApiError(404, "Student for this remark not found.");
     }
 
-    // Mark as positive if not already and visible to parent
+    if (req.user.role === "parent") {
+      const isChild =
+        student.guardianIds?.some(
+          (gid) =>
+            gid.toString() === req.user.id ||
+            gid.toString() === req.user._id?.toString()
+        ) ||
+        (req.user.phone && (student.parentPhone === req.user.phone || student.guardianPhone === req.user.phone)) ||
+        (req.user.email && student.parentEmail === req.user.email);
+
+      if (!isChild && req.user.role !== "admin") {
+        throw new ApiError(403, "You can only acknowledge remarks for your registered child.");
+      }
+
+      remark.parentAcknowledged = true;
+      remark.parentAcknowledgedAt = new Date();
+      await remark.save();
+
+      // Notify teacher if available
+      try {
+        if (remark.teacherId) {
+          const Teacher = require("../models/Teacher.model");
+          const teacherDoc = await Teacher.findById(remark.teacherId);
+          if (teacherDoc?.userId) {
+            await notify(teacherDoc.userId, {
+              type: "parent_acknowledgment",
+              title: `Parent acknowledged remark for ${student.name}`,
+              message: `The parent acknowledged and appreciated your note: "${remark.text.slice(0, 50)}..."`,
+              data: { studentId: student._id, remarkId: remark._id },
+            });
+          }
+        }
+      } catch (notifyErr) {
+        console.warn("Failed to notify teacher of parent acknowledgment:", notifyErr.message);
+      }
+
+      return res.status(200).json(
+        new ApiResponse(200, remark, "Thank you! Teacher has been notified of your appreciation.")
+      );
+    }
+
+    // Teacher/Admin flow: Mark as positive if not already and visible to parent
     remark.type = "positive";
     remark.visibleToParent = true;
     await remark.save();

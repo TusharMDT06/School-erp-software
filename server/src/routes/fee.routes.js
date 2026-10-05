@@ -36,7 +36,7 @@ router.get(
 
 // ── Student Invoices & Payment ─────────────────────────────────────────────
 router.get(
-  "/student/:studentId",
+  ["/student/:studentId", "/student/:studentId/transactions"],
   authorizeRoles("admin", "superadmin", "accountant", "student", "parent"),
   getStudentFeeTransactions
 );

@@ -35,10 +35,10 @@ router.get(
   remarkCtrl.getParentRemarks
 );
 
-// Appreciate positive remark (notifies parent)
+// Appreciate positive remark (notifies parent or acknowledges teacher)
 router.post(
   "/:id/appreciate",
-  authorizeRoles("teacher", "admin", "principal"),
+  authorizeRoles("teacher", "admin", "principal", "parent"),
   remarkCtrl.appreciateRemark
 );
 

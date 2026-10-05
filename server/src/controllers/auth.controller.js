@@ -201,7 +201,9 @@ const login = async (req, res, next) => {
     // 8. Set refresh token as httpOnly cookie
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
-    // 9. Return access token + safe user data
+    const isMobileClient = req.headers["x-client"]?.toLowerCase() === "mobile";
+
+    // 9. Return access token + safe user data (and refreshToken if mobile)
     return res.status(200).json(
       new ApiResponse(
         200,
@@ -215,6 +217,7 @@ const login = async (req, res, next) => {
             profileImage: user.profileImage,
           },
           accessToken,
+          ...(isMobileClient ? { refreshToken } : {}),
           redirectTo: roleDashboard[user.role] || "/dashboard",
         },
         "Login successful."
@@ -231,7 +234,10 @@ const login = async (req, res, next) => {
 // ══════════════════════════════════════════════════════════════════════════
 const refreshToken = async (req, res, next) => {
   try {
-    const token = req.cookies?.refreshToken;
+    const isMobileClient = req.headers["x-client"]?.toLowerCase() === "mobile";
+    const token =
+      req.cookies?.refreshToken ||
+      (isMobileClient ? req.body?.refreshToken || req.headers["x-refresh-token"] : null);
 
     if (!token) {
       return res.status(200).json(
@@ -294,7 +300,11 @@ const refreshToken = async (req, res, next) => {
       .json(
         new ApiResponse(
           200,
-          { accessToken, authenticated: true },
+          {
+            accessToken,
+            authenticated: true,
+            ...(isMobileClient ? { refreshToken: token } : {}),
+          },
           "Access token refreshed."
         )
       );

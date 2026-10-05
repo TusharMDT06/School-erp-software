@@ -60,7 +60,7 @@ router.get(
 
 // ── Student individual attendance report ────────────────────────────────────
 router.get(
-  "/student/:studentId/report",
+  ["/student/:studentId", "/student/:studentId/report"],
   authorizeRoles("teacher", "admin", "superadmin", "student", "parent"),
   getStudentAttendanceReport
 );

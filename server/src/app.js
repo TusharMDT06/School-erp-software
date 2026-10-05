@@ -59,6 +59,7 @@ const studentRemarkRoutes = require("./routes/studentRemark.routes");
 const teacherPortalExtraRoutes = require("./routes/teacherPortalExtra.routes");
 const communicationRoutes = require("./routes/communication.routes");
 const notificationRoutes = require("./routes/notification.routes");
+const userRoutes = require("./routes/user.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
 const morganMiddleware = require("./middlewares/morgan.middleware");
 
@@ -100,7 +101,14 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Client",
+      "x-client",
+      "X-Refresh-Token",
+      "x-refresh-token",
+    ],
   })
 );
 
@@ -209,6 +217,7 @@ app.use("/api/remarks", studentRemarkRoutes);
 app.use("/api/teacher", teacherPortalExtraRoutes);
 app.use("/api/communication", communicationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/users", userRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
